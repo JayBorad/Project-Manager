@@ -14,21 +14,27 @@ import {
   LinkSquareIcon,
   AttachmentIcon,
   MessageIcon,
+  CheckmarkSquareIcon,
 } from "@hugeicons/core-free-icons";
 import type { Notification } from "@/lib/data";
 import { USERS } from "@/lib/data";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function InboxPage() {
   const { notifications, setNotifications, currentUser } = useDashboard();
   const [selectedId, setSelectedId] = React.useState<string | null>(
-    notifications[0]?.id ?? null
+    notifications[0]?.id ?? null,
   );
   const [commentText, setCommentText] = React.useState("");
   const selected = notifications.find((n) => n.id === selectedId);
 
   const markAsRead = (id: string) => {
     setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+      prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
     );
   };
 
@@ -38,7 +44,8 @@ export default function InboxPage() {
 
   const deleteOne = (id: string) => {
     setNotifications((prev) => prev.filter((n) => n.id !== id));
-    if (selectedId === id) setSelectedId(notifications.find((n) => n.id !== id)?.id ?? null);
+    if (selectedId === id)
+      setSelectedId(notifications.find((n) => n.id !== id)?.id ?? null);
   };
 
   const deleteAll = () => {
@@ -63,8 +70,8 @@ export default function InboxPage() {
                 },
               ],
             }
-          : n
-      )
+          : n,
+      ),
     );
     setCommentText("");
   };
@@ -76,45 +83,57 @@ export default function InboxPage() {
         n.id === notificationId
           ? {
               ...n,
-              attachments: [...n.attachments, { id: `a-${Date.now()}`, name, url: "#" }],
+              attachments: [
+                ...n.attachments,
+                { id: `a-${Date.now()}`, name, url: "#" },
+              ],
             }
-          : n
-      )
+          : n,
+      ),
     );
   };
 
   return (
     <div className="flex h-full flex-1 flex-col overflow-hidden">
-      <header className="border-border/80 bg-card/80 flex h-14 shrink-0 items-center justify-between gap-3 border-b px-4">
-        <h1 className="text-sm font-semibold">Inbox</h1>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-8 text-xs"
-            onClick={markAllAsRead}
-          >
-            Mark all as read
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-8 text-xs text-destructive hover:text-destructive"
-            onClick={deleteAll}
-            disabled={notifications.length === 0}
-          >
-            Delete all
-          </Button>
-        </div>
-      </header>
-
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-0 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)]">
         {/* List */}
-        <Card className="bg-card/80 ring-border/60 flex flex-col rounded-none border-0 border-r">
-          <CardHeader className="border-border/80 shrink-0 border-b py-3">
+        <div className="bg-card/80 ring-border/60 flex min-h-0 flex-col rounded-none border-0 border-r">
+          <div className="border-border/80 shrink-0 border-b p-3 flex items-center justify-between">
             <CardTitle className="text-xs">Notifications</CardTitle>
-          </CardHeader>
-          <ScrollArea className="flex-1">
+            <div className="flex items-center gap-0.5">
+              <Tooltip>
+                <TooltipTrigger>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0 flex items-center justify-center"
+                    onClick={markAllAsRead}
+                  >
+                    <HugeiconsIcon
+                      icon={CheckmarkSquareIcon}
+                      className="h-4 w-4"
+                    />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">Mark all as read</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0 flex items-center justify-center text-destructive hover:text-destructive"
+                    onClick={deleteAll}
+                    disabled={notifications.length === 0}
+                  >
+                    <HugeiconsIcon icon={Delete02Icon} className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">Delete all</TooltipContent>
+              </Tooltip>
+            </div>
+          </div>
+          <ScrollArea className="flex-1 min-h-0">
             <CardContent className="p-0">
               {notifications.length === 0 ? (
                 <div className="text-muted-foreground py-8 text-center text-sm">
@@ -128,7 +147,7 @@ export default function InboxPage() {
                       className={cn(
                         "hover:bg-muted/60 flex cursor-pointer flex-col gap-1 border-b border-border/60 px-3 py-3 transition-colors",
                         selectedId === item.id && "bg-muted/80",
-                        !item.read && "bg-primary/5"
+                        !item.read && "bg-primary/5",
                       )}
                       onClick={() => {
                         setSelectedId(item.id);
@@ -158,7 +177,10 @@ export default function InboxPage() {
                             }}
                             title="Mark as read"
                           >
-                            <HugeiconsIcon icon={LinkSquareIcon} className="h-3.5 w-3.5" />
+                            <HugeiconsIcon
+                              icon={LinkSquareIcon}
+                              className="h-3.5 w-3.5"
+                            />
                           </Button>
                           <Button
                             variant="ghost"
@@ -170,7 +192,10 @@ export default function InboxPage() {
                             }}
                             title="Delete"
                           >
-                            <HugeiconsIcon icon={Delete02Icon} className="h-3.5 w-3.5" />
+                            <HugeiconsIcon
+                              icon={Delete02Icon}
+                              className="h-3.5 w-3.5"
+                            />
                           </Button>
                         </div>
                       </div>
@@ -180,13 +205,13 @@ export default function InboxPage() {
               )}
             </CardContent>
           </ScrollArea>
-        </Card>
+        </div>
 
         {/* Detail */}
-        <Card className="bg-card/80 ring-border/60 flex flex-col rounded-none border-0">
-          <CardHeader className="border-border/80 shrink-0 border-b py-3">
+        <div className="bg-card/80 ring-border/60 flex min-h-0 flex-col rounded-none border-0">
+          <div className="border-border/80 shrink-0 border-b p-5">
             <CardTitle className="text-xs">Details</CardTitle>
-          </CardHeader>
+          </div>
           {selected ? (
             <NotificationDetail
               notification={selected}
@@ -200,7 +225,7 @@ export default function InboxPage() {
               Select a notification to view details
             </CardContent>
           )}
-        </Card>
+        </div>
       </div>
     </div>
   );
@@ -220,7 +245,7 @@ function NotificationDetail({
   onAddAttachment: () => void;
 }) {
   return (
-    <ScrollArea className="flex-1">
+    <ScrollArea className="flex-1 min-h-0">
       <CardContent className="flex flex-col gap-4 py-4">
         <div>
           <h2 className="text-sm font-medium">{notification.title}</h2>
@@ -262,7 +287,9 @@ function NotificationDetail({
               </li>
             ))}
             {notification.attachments.length === 0 && (
-              <li className="text-muted-foreground text-[11px]">No attachments</li>
+              <li className="text-muted-foreground text-[11px]">
+                No attachments
+              </li>
             )}
           </ul>
         </div>
@@ -282,12 +309,14 @@ function NotificationDetail({
                     <span
                       className={cn(
                         "bg-linear-to-br flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-semibold text-white",
-                        author ? author.color : "bg-muted"
+                        author ? author.color : "bg-muted",
                       )}
                     >
                       {author?.initials ?? "?"}
                     </span>
-                    <span className="font-medium">{author?.name ?? "Unknown"}</span>
+                    <span className="font-medium">
+                      {author?.name ?? "Unknown"}
+                    </span>
                     <span className="text-muted-foreground">{c.createdAt}</span>
                   </div>
                   <p className="mt-1 text-xs">{c.text}</p>
@@ -301,7 +330,9 @@ function NotificationDetail({
               onChange={(e) => setCommentText(e.target.value)}
               placeholder="Add a comment..."
               className="h-8 text-xs"
-              onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), onAddComment())}
+              onKeyDown={(e) =>
+                e.key === "Enter" && (e.preventDefault(), onAddComment())
+              }
             />
             <Button
               size="sm"

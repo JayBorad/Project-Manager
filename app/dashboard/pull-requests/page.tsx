@@ -46,7 +46,6 @@ export default function PullRequestsPage() {
   return (
     <div className="flex h-full flex-1 flex-col overflow-hidden">
       <header className="border-border/80 bg-card/80 flex h-14 shrink-0 items-center gap-3 border-b px-4">
-        <h1 className="text-sm font-semibold">Pull requests</h1>
         <Select
           value={projectFilter}
           onValueChange={(value) => {

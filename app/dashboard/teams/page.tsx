@@ -53,8 +53,7 @@ export default function TeamsPage() {
 
   return (
     <div className="flex h-full flex-1 flex-col overflow-hidden">
-      <header className="border-border/80 bg-card/80 flex h-14 shrink-0 items-center justify-between gap-3 border-b px-4">
-        <h1 className="text-sm font-semibold">Teams</h1>
+      <header className="border-border/80 bg-card/80 flex h-14 shrink-0 items-center justify-end gap-3 border-b px-4">
         <Button size="sm" className="h-8 text-xs" onClick={() => setAddOpen(true)}>
           <HugeiconsIcon icon={PlusSignIcon} className="mr-1 h-3.5 w-3.5" />
           Add Team

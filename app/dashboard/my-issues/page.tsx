@@ -299,22 +299,24 @@ function IssueCard({
         >
           <span className="text-muted-foreground text-[10px]">Assigned to</span>
           <DropdownMenu>
-            <DropdownMenuTrigger>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 gap-1 px-1 text-[10px]"
+            <DropdownMenuTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 gap-1 px-1 text-[10px]"
+                />
+              }
+            >
+              <span
+                className={cn(
+                  "flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-semibold text-white",
+                  assignee ? `bg-linear-to-br ${assignee.color}` : "bg-muted"
+                )}
               >
-                <span
-                  className={cn(
-                    "flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-semibold text-white",
-                    assignee ? `bg-linear-to-br ${assignee.color}` : "bg-muted"
-                  )}
-                >
-                  {assignee?.initials ?? "?"}
-                </span>
-                <span className="max-w-[72px] truncate">{assignee?.name ?? "Unassigned"}</span>
-              </Button>
+                {assignee?.initials ?? "?"}
+              </span>
+              <span className="max-w-[72px] truncate">{assignee?.name ?? "Unassigned"}</span>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               {USERS.map((u) => (
