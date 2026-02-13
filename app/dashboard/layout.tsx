@@ -16,6 +16,8 @@ import {
   LayoutIcon,
   Cancel01Icon,
   ArrowRight01Icon,
+  MoonIcon,
+  SunIcon,
 } from "@hugeicons/core-free-icons";
 
 export default function DashboardLayout({
@@ -83,10 +85,11 @@ function DashboardHeader({
 
   const unreadCount = React.useMemo(
     () => notifications.filter((n) => !n.read).length,
-    [notifications]
+    [notifications],
   );
 
   const pageTitle = getPageTitle(pathname);
+  const { theme, setTheme } = useDashboard();
 
   return (
     <>
@@ -101,9 +104,7 @@ function DashboardHeader({
           >
             <HugeiconsIcon
               icon={LayoutIcon}
-              className={cn(
-                "h-4 w-4 transition-transform"
-              )}
+              className={cn("h-4 w-4 transition-transform")}
             />
           </Button>
           <span className="truncate text-xs font-semibold sm:text-sm">
@@ -116,7 +117,7 @@ function DashboardHeader({
           <div
             className={cn(
               "pointer-events-none absolute inset-y-1 left-1.5 flex items-center text-muted-foreground transition-opacity",
-              searchOpen ? "opacity-100" : "opacity-0"
+              searchOpen ? "opacity-100" : "opacity-0",
             )}
           >
             <HugeiconsIcon icon={SearchIcon} className="h-3.5 w-3.5" />
@@ -129,7 +130,7 @@ function DashboardHeader({
               "h-8 w-full rounded-md border border-border/80 bg-background/80 pl-7 pr-8 text-xs transition-[max-width,opacity] duration-200",
               searchOpen
                 ? "pointer-events-auto max-w-md opacity-100"
-                : "pointer-events-none max-w-0 opacity-0"
+                : "pointer-events-none max-w-0 opacity-0",
             )}
           />
           {searchOpen && (
@@ -158,7 +159,20 @@ function DashboardHeader({
           >
             <HugeiconsIcon icon={SearchIcon} className="h-4 w-4" />
           </Button>
-
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 shrink-0 rounded-xl"
+            onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+            aria-label={
+              theme === "light" ? "Switch to dark" : "Switch to light"
+            }
+          >
+            <HugeiconsIcon
+              icon={theme === "light" ? MoonIcon : SunIcon}
+              className="h-4 w-4"
+            />
+          </Button>
           <Button
             variant="ghost"
             size="icon-sm"
@@ -180,7 +194,10 @@ function DashboardHeader({
       {searchOpen && (
         <div className="border-border/80 bg-card/95 flex items-center gap-2 border-b px-3 py-2 sm:hidden">
           <div className="flex-1 flex items-center gap-2 rounded-md border border-border/80 bg-background/80 px-2">
-            <HugeiconsIcon icon={SearchIcon} className="h-3.5 w-3.5 text-muted-foreground" />
+            <HugeiconsIcon
+              icon={SearchIcon}
+              className="h-3.5 w-3.5 text-muted-foreground"
+            />
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -260,7 +277,7 @@ function NotificationDrawer({
                 key={item.id}
                 className={cn(
                   "hover:bg-muted/70 flex flex-col gap-1 rounded-md border border-border/60 bg-background/80 p-2.5 transition-colors",
-                  !item.read && "ring-1 ring-primary/40"
+                  !item.read && "ring-1 ring-primary/40",
                 )}
               >
                 <div className="flex items-start justify-between gap-2">
@@ -294,7 +311,10 @@ function NotificationDrawer({
                     className="h-6 w-6 shrink-0"
                     aria-label="Open in inbox"
                   >
-                    <HugeiconsIcon icon={ArrowRight01Icon} className="h-3.5 w-3.5" />
+                    <HugeiconsIcon
+                      icon={ArrowRight01Icon}
+                      className="h-3.5 w-3.5"
+                    />
                   </Button>
                 </div>
               </div>
