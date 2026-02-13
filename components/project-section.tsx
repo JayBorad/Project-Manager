@@ -15,7 +15,7 @@ import {
   type Team,
   type UserDetail,
 } from "@/lib/data";
-import { cn } from "@/lib/utils";
+import { cn, getUserColorClass } from "@/lib/utils";
 import { CreateIssueDialog } from "@/components/create-issue-dialog";
 import { IssueDetailDialog } from "@/components/issue-detail-dialog";
 import {
@@ -73,7 +73,12 @@ import {
   UserIcon,
 } from "@hugeicons/core-free-icons";
 
-type ProjectSectionType = "tasks" | "issues" | "pull-requests" | "teams" | "members";
+type ProjectSectionType =
+  | "tasks"
+  | "issues"
+  | "pull-requests"
+  | "teams"
+  | "members";
 
 export type ProjectSectionProps = {
   projectId: string;
@@ -85,8 +90,16 @@ const PR_STATUS_META: Record<
   { label: string; color: string; icon: typeof LayoutIcon }
 > = {
   open: { label: "Open", color: "text-sky-400", icon: LinkSquareIcon },
-  merged: { label: "Merged", color: "text-emerald-400", icon: CheckmarkCircle01Icon },
-  closed: { label: "Closed", color: "text-rose-400", icon: MoreHorizontalCircle01Icon },
+  merged: {
+    label: "Merged",
+    color: "text-emerald-400",
+    icon: CheckmarkCircle01Icon,
+  },
+  closed: {
+    label: "Closed",
+    color: "text-rose-400",
+    icon: MoreHorizontalCircle01Icon,
+  },
 };
 
 export function ProjectSection({ projectId, section }: ProjectSectionProps) {
@@ -103,10 +116,13 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
     currentUser,
   } = useDashboard();
   const [createOpen, setCreateOpen] = React.useState(false);
-  const [createDefaultStatusId, setCreateDefaultStatusId] = React.useState<IssueStatusId>("todo");
+  const [createDefaultStatusId, setCreateDefaultStatusId] =
+    React.useState<IssueStatusId>("todo");
   const [statusFilter, setStatusFilter] = React.useState<IssueStatusId[]>([]);
   const [assigneeFilter, setAssigneeFilter] = React.useState<string[]>([]);
-  const [priorityFilter, setPriorityFilter] = React.useState<Issue["priority"][]>([]);
+  const [priorityFilter, setPriorityFilter] = React.useState<
+    Issue["priority"][]
+  >([]);
   const [labelFilter, setLabelFilter] = React.useState<string[]>([]);
   const [viewMode, setViewMode] = React.useState<"board" | "list">("board");
   const [filterMenuOpen, setFilterMenuOpen] = React.useState(false);
@@ -124,76 +140,109 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
   >("root");
   const [issueFilterSearch, setIssueFilterSearch] = React.useState("");
   const [creatorFilter, setCreatorFilter] = React.useState<string[]>([]);
-  const [issueStatusFilter, setIssueStatusFilter] = React.useState<IssueStatusId[]>([]);
+  const [issueStatusFilter, setIssueStatusFilter] = React.useState<
+    IssueStatusId[]
+  >([]);
   const [issueDateFilter, setIssueDateFilter] = React.useState<string[]>([]);
-  const [projectIssueCreateOpen, setProjectIssueCreateOpen] = React.useState(false);
+  const [projectIssueCreateOpen, setProjectIssueCreateOpen] =
+    React.useState(false);
   const [projectIssueTitle, setProjectIssueTitle] = React.useState("");
-  const [projectIssueDescription, setProjectIssueDescription] = React.useState("");
-  const [projectIssuePriority, setProjectIssuePriority] = React.useState<Issue["priority"]>("Medium");
+  const [projectIssueDescription, setProjectIssueDescription] =
+    React.useState("");
+  const [projectIssuePriority, setProjectIssuePriority] =
+    React.useState<Issue["priority"]>("Medium");
   const [prHeaderSearch, setPrHeaderSearch] = React.useState("");
   const [prFilterMenuOpen, setPrFilterMenuOpen] = React.useState(false);
-  const [prFilterPanel, setPrFilterPanel] = React.useState<"root" | "author" | "status" | "date" | "project">("root");
+  const [prFilterPanel, setPrFilterPanel] = React.useState<
+    "root" | "author" | "status" | "date" | "project"
+  >("root");
   const [prFilterSearch, setPrFilterSearch] = React.useState("");
   const [prAuthorFilter, setPrAuthorFilter] = React.useState<string[]>([]);
-  const [prStatusFilter, setPrStatusFilter] = React.useState<PullRequest["status"][]>([]);
+  const [prStatusFilter, setPrStatusFilter] = React.useState<
+    PullRequest["status"][]
+  >([]);
   const [prDateFilter, setPrDateFilter] = React.useState<string[]>([]);
-  const [prProjectFilter, setPrProjectFilter] = React.useState<string>(projectId);
+  const [prProjectFilter, setPrProjectFilter] =
+    React.useState<string>(projectId);
   const [projectPrCreateOpen, setProjectPrCreateOpen] = React.useState(false);
   const [projectPrTitle, setProjectPrTitle] = React.useState("");
   const [projectPrDescription, setProjectPrDescription] = React.useState("");
-  const [projectPrStatus, setProjectPrStatus] = React.useState<PullRequest["status"]>("open");
-  const [detailPullRequest, setDetailPullRequest] = React.useState<PullRequest | null>(null);
-  const [detailPullRequestOpen, setDetailPullRequestOpen] = React.useState(false);
+  const [projectPrStatus, setProjectPrStatus] =
+    React.useState<PullRequest["status"]>("open");
+  const [detailPullRequest, setDetailPullRequest] =
+    React.useState<PullRequest | null>(null);
+  const [detailPullRequestOpen, setDetailPullRequestOpen] =
+    React.useState(false);
   const [teamHeaderSearch, setTeamHeaderSearch] = React.useState("");
   const [teamFilterMenuOpen, setTeamFilterMenuOpen] = React.useState(false);
-  const [teamFilterPanel, setTeamFilterPanel] = React.useState<"root" | "member">("root");
+  const [teamFilterPanel, setTeamFilterPanel] = React.useState<
+    "root" | "member"
+  >("root");
   const [teamFilterSearch, setTeamFilterSearch] = React.useState("");
   const [teamMemberFilter, setTeamMemberFilter] = React.useState<string[]>([]);
   const [teamCreateOpen, setTeamCreateOpen] = React.useState(false);
   const [teamCreateName, setTeamCreateName] = React.useState("");
   const [teamCreateIdentifier, setTeamCreateIdentifier] = React.useState("");
-  const [teamCreateMemberIds, setTeamCreateMemberIds] = React.useState<string[]>([]);
+  const [teamCreateMemberIds, setTeamCreateMemberIds] = React.useState<
+    string[]
+  >([]);
   const [detailTeam, setDetailTeam] = React.useState<Team | null>(null);
   const [detailTeamOpen, setDetailTeamOpen] = React.useState(false);
-  const [teamDeleteConfirmOpen, setTeamDeleteConfirmOpen] = React.useState(false);
+  const [teamDeleteConfirmOpen, setTeamDeleteConfirmOpen] =
+    React.useState(false);
   const [memberHeaderSearch, setMemberHeaderSearch] = React.useState("");
   const [memberFilterMenuOpen, setMemberFilterMenuOpen] = React.useState(false);
-  const [memberFilterPanel, setMemberFilterPanel] = React.useState<"root" | "team" | "status">("root");
+  const [memberFilterPanel, setMemberFilterPanel] = React.useState<
+    "root" | "team" | "status"
+  >("root");
   const [memberFilterSearch, setMemberFilterSearch] = React.useState("");
   const [memberTeamFilter, setMemberTeamFilter] = React.useState<string[]>([]);
-  const [memberStatusFilter, setMemberStatusFilter] = React.useState<UserDetail["status"][]>([]);
+  const [memberStatusFilter, setMemberStatusFilter] = React.useState<
+    UserDetail["status"][]
+  >([]);
   const [memberCreateOpen, setMemberCreateOpen] = React.useState(false);
   const [memberCreateName, setMemberCreateName] = React.useState("");
   const [memberCreateEmail, setMemberCreateEmail] = React.useState("");
-  const [memberCreateStatus, setMemberCreateStatus] = React.useState<UserDetail["status"]>("member");
-  const [memberCreateTeamIds, setMemberCreateTeamIds] = React.useState<string[]>([]);
-  const [memberCreateJoinedDate, setMemberCreateJoinedDate] = React.useState("");
-  const [detailMember, setDetailMember] = React.useState<(UserDetail & { joinedAt?: string }) | null>(null);
+  const [memberCreateStatus, setMemberCreateStatus] =
+    React.useState<UserDetail["status"]>("member");
+  const [memberCreateTeamIds, setMemberCreateTeamIds] = React.useState<
+    string[]
+  >([]);
+  const [memberCreateJoinedDate, setMemberCreateJoinedDate] =
+    React.useState("");
+  const [detailMember, setDetailMember] = React.useState<
+    (UserDetail & { joinedAt?: string }) | null
+  >(null);
   const [detailMemberOpen, setDetailMemberOpen] = React.useState(false);
-  const [memberDeleteConfirmOpen, setMemberDeleteConfirmOpen] = React.useState(false);
+  const [memberDeleteConfirmOpen, setMemberDeleteConfirmOpen] =
+    React.useState(false);
 
   const project = React.useMemo(
     () => PROJECTS.find((p) => p.id === projectId) ?? PROJECTS[0],
-    [projectId]
+    [projectId],
   );
 
   const projectIssues = React.useMemo(
     () => issues.filter((i) => i.projectId === projectId),
-    [issues, projectId]
+    [issues, projectId],
   );
 
   const getIssueCreatorId = React.useCallback(
-    (issue: Issue) => (issue as Issue & { creatorId?: string }).creatorId ?? issue.assigneeId,
-    []
+    (issue: Issue) =>
+      (issue as Issue & { creatorId?: string }).creatorId ?? issue.assigneeId,
+    [],
   );
 
   const getIssueDateValue = React.useCallback(
-    (issue: Issue) => (issue as Issue & { createdAt?: string }).createdAt ?? issue.updatedAt,
-    []
+    (issue: Issue) =>
+      (issue as Issue & { createdAt?: string }).createdAt ?? issue.updatedAt,
+    [],
   );
 
   const issueDateOptions = React.useMemo(() => {
-    const values = Array.from(new Set(projectIssues.map((issue) => getIssueDateValue(issue))));
+    const values = Array.from(
+      new Set(projectIssues.map((issue) => getIssueDateValue(issue))),
+    );
     return values;
   }, [projectIssues, getIssueDateValue]);
 
@@ -205,12 +254,14 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
       list = list.filter(
         (issue) =>
           issue.title.toLowerCase().includes(q) ||
-          issue.description.toLowerCase().includes(q)
+          issue.description.toLowerCase().includes(q),
       );
     }
 
     if (creatorFilter.length) {
-      list = list.filter((issue) => creatorFilter.includes(getIssueCreatorId(issue)));
+      list = list.filter((issue) =>
+        creatorFilter.includes(getIssueCreatorId(issue)),
+      );
     }
 
     if (issueStatusFilter.length) {
@@ -218,7 +269,9 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
     }
 
     if (issueDateFilter.length) {
-      list = list.filter((issue) => issueDateFilter.includes(getIssueDateValue(issue)));
+      list = list.filter((issue) =>
+        issueDateFilter.includes(getIssueDateValue(issue)),
+      );
     }
 
     return list;
@@ -249,12 +302,18 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
 
     if (labelFilter.length) {
       list = list.filter((i) =>
-        i.labels.some((l) => labelFilter.includes(l.name))
+        i.labels.some((l) => labelFilter.includes(l.name)),
       );
     }
 
     return list;
-  }, [projectIssues, statusFilter, assigneeFilter, priorityFilter, labelFilter]);
+  }, [
+    projectIssues,
+    statusFilter,
+    assigneeFilter,
+    priorityFilter,
+    labelFilter,
+  ]);
 
   const projectIssuesByStatus = React.useMemo(() => {
     const map: Record<IssueStatusId, Issue[]> = {
@@ -272,13 +331,14 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
   }, [filteredProjectIssues]);
 
   const projectPullRequests = React.useMemo(
-    () => pullRequests.filter((pr: PullRequest) => pr.authorId === currentUser.id),
-    [pullRequests, currentUser.id]
+    () =>
+      pullRequests.filter((pr: PullRequest) => pr.authorId === currentUser.id),
+    [pullRequests, currentUser.id],
   );
 
   const prDateOptions = React.useMemo(
     () => Array.from(new Set(projectPullRequests.map((pr) => pr.createdAt))),
-    [projectPullRequests]
+    [projectPullRequests],
   );
 
   const filteredProjectPullRequests = React.useMemo(() => {
@@ -289,7 +349,7 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
       list = list.filter(
         (pr) =>
           pr.title.toLowerCase().includes(q) ||
-          pr.description.toLowerCase().includes(q)
+          pr.description.toLowerCase().includes(q),
       );
     }
 
@@ -310,11 +370,18 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
     }
 
     return list;
-  }, [projectPullRequests, prHeaderSearch, prAuthorFilter, prStatusFilter, prDateFilter, prProjectFilter]);
+  }, [
+    projectPullRequests,
+    prHeaderSearch,
+    prAuthorFilter,
+    prStatusFilter,
+    prDateFilter,
+    prProjectFilter,
+  ]);
 
   const projectTeams = React.useMemo(
     () => teams.filter((t) => t.projectIds.includes(projectId)),
-    [teams, projectId]
+    [teams, projectId],
   );
 
   const filteredProjectTeams = React.useMemo(() => {
@@ -325,13 +392,13 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
       list = list.filter(
         (team) =>
           team.name.toLowerCase().includes(q) ||
-          team.identifier.toLowerCase().includes(q)
+          team.identifier.toLowerCase().includes(q),
       );
     }
 
     if (teamMemberFilter.length) {
       list = list.filter((team) =>
-        teamMemberFilter.some((memberId) => team.memberIds.includes(memberId))
+        teamMemberFilter.some((memberId) => team.memberIds.includes(memberId)),
       );
     }
 
@@ -356,44 +423,53 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
       list = list.filter(
         (member) =>
           member.name.toLowerCase().includes(q) ||
-          member.email.toLowerCase().includes(q)
+          member.email.toLowerCase().includes(q),
       );
     }
 
     if (memberTeamFilter.length) {
       list = list.filter((member) =>
-        memberTeamFilter.some((teamId) => member.teamIds.includes(teamId))
+        memberTeamFilter.some((teamId) => member.teamIds.includes(teamId)),
       );
     }
 
     if (memberStatusFilter.length) {
-      list = list.filter((member) => memberStatusFilter.includes(member.status));
+      list = list.filter((member) =>
+        memberStatusFilter.includes(member.status),
+      );
     }
 
     return list;
-  }, [projectMembers, memberHeaderSearch, memberTeamFilter, memberStatusFilter]);
+  }, [
+    projectMembers,
+    memberHeaderSearch,
+    memberTeamFilter,
+    memberStatusFilter,
+  ]);
 
   const changeStatus = (issueId: string, statusId: IssueStatusId) => {
     setIssues((prev) =>
       prev.map((i) =>
-        i.id === issueId ? { ...i, statusId, updatedAt: "Just now" } : i
-      )
+        i.id === issueId ? { ...i, statusId, updatedAt: "Just now" } : i,
+      ),
     );
   };
 
   const assignTo = (issueId: string, userId: string) => {
     setIssues((prev) =>
       prev.map((i) =>
-        i.id === issueId ? { ...i, assigneeId: userId, updatedAt: "Just now" } : i
-      )
+        i.id === issueId
+          ? { ...i, assigneeId: userId, updatedAt: "Just now" }
+          : i,
+      ),
     );
   };
 
   const changePriority = (issueId: string, priority: Issue["priority"]) => {
     setIssues((prev) =>
       prev.map((i) =>
-        i.id === issueId ? { ...i, priority, updatedAt: "Just now" } : i
-      )
+        i.id === issueId ? { ...i, priority, updatedAt: "Just now" } : i,
+      ),
     );
   };
 
@@ -426,8 +502,8 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
     if (!id) return;
     setIssues((prev) =>
       prev.map((task) =>
-        task.id === id ? { ...task, statusId, updatedAt: "Just now" } : task
-      )
+        task.id === id ? { ...task, statusId, updatedAt: "Just now" } : task,
+      ),
     );
     setDraggingId(null);
   };
@@ -444,9 +520,7 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
   };
 
   const issueActiveFilterCount =
-    creatorFilter.length +
-    issueStatusFilter.length +
-    issueDateFilter.length;
+    creatorFilter.length + issueStatusFilter.length + issueDateFilter.length;
 
   const resetIssueFilterPanel = () => {
     setIssueFilterPanel("root");
@@ -455,11 +529,17 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
 
   const handleCreateProjectIssue = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!projectIssueTitle.trim() || !projectIssueDescription.trim() || !projectIssuePriority) {
+    if (
+      !projectIssueTitle.trim() ||
+      !projectIssueDescription.trim() ||
+      !projectIssuePriority
+    ) {
       return;
     }
 
-    const existingKeys = issues.filter((i) => i.projectId === projectId).map((i) => i.key);
+    const existingKeys = issues
+      .filter((i) => i.projectId === projectId)
+      .map((i) => i.key);
     const maxNum = existingKeys.reduce((acc, key) => {
       const n = parseInt(key.split("-")[1], 10);
       return Number.isNaN(n) ? acc : Math.max(acc, n);
@@ -488,7 +568,10 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
   };
 
   const prActiveFilterCount =
-    prAuthorFilter.length + prStatusFilter.length + prDateFilter.length + (prProjectFilter !== "all" ? 1 : 0);
+    prAuthorFilter.length +
+    prStatusFilter.length +
+    prDateFilter.length +
+    (prProjectFilter !== "all" ? 1 : 0);
 
   const resetPrFilterPanel = () => {
     setPrFilterPanel("root");
@@ -501,7 +584,7 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
 
     const maxNumber = projectPullRequests.reduce(
       (acc, pr) => Math.max(acc, pr.number),
-      0
+      0,
     );
 
     const newPr: PullRequest = {
@@ -531,7 +614,9 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
 
   const updatePullRequest = (id: string, patch: Partial<PullRequest>) => {
     setPullRequests((prev) =>
-      prev.map((pr) => (pr.id === id ? { ...pr, ...patch, updatedAt: "Just now" } : pr))
+      prev.map((pr) =>
+        pr.id === id ? { ...pr, ...patch, updatedAt: "Just now" } : pr,
+      ),
     );
   };
 
@@ -555,12 +640,12 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
 
   const toggleTeamMemberSelection = (
     memberId: string,
-    setState: React.Dispatch<React.SetStateAction<string[]>>
+    setState: React.Dispatch<React.SetStateAction<string[]>>,
   ) => {
     setState((prev) =>
       prev.includes(memberId)
         ? prev.filter((id) => id !== memberId)
-        : [...prev, memberId]
+        : [...prev, memberId],
     );
   };
 
@@ -587,7 +672,7 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
 
   const updateTeam = (teamId: string, patch: Partial<Team>) => {
     setTeams((prev) =>
-      prev.map((team) => (team.id === teamId ? { ...team, ...patch } : team))
+      prev.map((team) => (team.id === teamId ? { ...team, ...patch } : team)),
     );
   };
 
@@ -610,8 +695,7 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
   };
 
   const memberActiveFilterCount =
-    memberTeamFilter.length +
-    memberStatusFilter.length;
+    memberTeamFilter.length + memberStatusFilter.length;
 
   const resetMemberFilterPanel = () => {
     setMemberFilterPanel("root");
@@ -630,10 +714,10 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
       .slice(0, 2);
 
     const colorPool = [
-      "from-emerald-500 to-sky-500",
-      "from-violet-500 to-amber-500",
-      "from-amber-500 to-rose-500",
-      "from-sky-500 to-emerald-500",
+      "bg-emerald-500",
+      "bg-violet-500",
+      "bg-amber-500",
+      "bg-sky-500",
     ] as const;
 
     const newMember: UserDetail & { joinedAt?: string } = {
@@ -652,9 +736,14 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
       setTeams((prev) =>
         prev.map((team) =>
           memberCreateTeamIds.includes(team.id)
-            ? { ...team, memberIds: team.memberIds.includes(newMember.id) ? team.memberIds : [...team.memberIds, newMember.id] }
-            : team
-        )
+            ? {
+                ...team,
+                memberIds: team.memberIds.includes(newMember.id)
+                  ? team.memberIds
+                  : [...team.memberIds, newMember.id],
+              }
+            : team,
+        ),
       );
     }
 
@@ -668,14 +757,14 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
 
   const updateMember = (
     memberId: string,
-    patch: Partial<UserDetail & { joinedAt?: string }>
+    patch: Partial<UserDetail & { joinedAt?: string }>,
   ) => {
     setUserDetails((prev) =>
       prev.map((member) =>
         member.id === memberId
           ? ({ ...member, ...patch } as UserDetail)
-          : member
-      )
+          : member,
+      ),
     );
   };
 
@@ -688,10 +777,13 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
           return { ...team, memberIds: [...team.memberIds, memberId] };
         }
         if (!shouldHaveMember && hasMember) {
-          return { ...team, memberIds: team.memberIds.filter((id) => id !== memberId) };
+          return {
+            ...team,
+            memberIds: team.memberIds.filter((id) => id !== memberId),
+          };
         }
         return team;
-      })
+      }),
     );
   };
 
@@ -701,7 +793,7 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
       prev.map((team) => ({
         ...team,
         memberIds: team.memberIds.filter((id) => id !== memberId),
-      }))
+      })),
     );
     setMemberDeleteConfirmOpen(false);
     setDetailMemberOpen(false);
@@ -715,14 +807,19 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
       email: detailMember.email.trim(),
       status: detailMember.status,
       teamIds: detailMember.teamIds,
-      joinedAt: (detailMember as UserDetail & { joinedAt?: string }).joinedAt ?? "",
+      joinedAt:
+        (detailMember as UserDetail & { joinedAt?: string }).joinedAt ?? "",
     });
     syncMemberTeams(detailMember.id, detailMember.teamIds);
     setDetailMemberOpen(false);
     setDetailMember(null);
   };
 
-  const navItems: { id: ProjectSectionType; label: string; icon: typeof LayoutIcon }[] = [
+  const navItems: {
+    id: ProjectSectionType;
+    label: string;
+    icon: typeof LayoutIcon;
+  }[] = [
     { id: "tasks", label: "Tasks", icon: LayoutIcon },
     { id: "issues", label: "Issues", icon: FileIcon },
     { id: "pull-requests", label: "Pull requests", icon: LinkSquareIcon },
@@ -737,7 +834,7 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
           <span
             className={cn(
               "flex h-6 w-6 items-center justify-center rounded text-[10px] font-semibold text-white",
-              project.color
+              project.color,
             )}
           >
             {project.code.slice(0, 2).toUpperCase()}
@@ -759,7 +856,7 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
               className={cn(
                 "hover:bg-muted/80 text-muted-foreground flex items-center gap-1 rounded-full px-2 py-1 text-[10px] sm:text-xs",
                 section === item.id &&
-                  "bg-primary/10 text-primary hover:bg-primary/15"
+                  "bg-primary/10 text-primary hover:bg-primary/15",
               )}
             >
               <HugeiconsIcon icon={item.icon} className="h-3.5 w-3.5" />
@@ -825,10 +922,16 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                     onClick={() => setFilterPanel("status")}
                   >
                     <span className="flex items-center gap-2">
-                      <HugeiconsIcon icon={LayoutIcon} className="h-3.5 w-3.5 text-amber-400" />
+                      <HugeiconsIcon
+                        icon={LayoutIcon}
+                        className="h-3.5 w-3.5 text-amber-400"
+                      />
                       <span>Status</span>
                     </span>
-                    <HugeiconsIcon icon={ArrowRight01Icon} className="h-3 w-3 text-muted-foreground" />
+                    <HugeiconsIcon
+                      icon={ArrowRight01Icon}
+                      className="h-3 w-3 text-muted-foreground"
+                    />
                   </button>
                   <button
                     type="button"
@@ -836,10 +939,16 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                     onClick={() => setFilterPanel("assignee")}
                   >
                     <span className="flex items-center gap-2">
-                      <HugeiconsIcon icon={UserIcon} className="h-3.5 w-3.5 text-sky-400" />
+                      <HugeiconsIcon
+                        icon={UserIcon}
+                        className="h-3.5 w-3.5 text-sky-400"
+                      />
                       <span>Assignee</span>
                     </span>
-                    <HugeiconsIcon icon={ArrowRight01Icon} className="h-3 w-3 text-muted-foreground" />
+                    <HugeiconsIcon
+                      icon={ArrowRight01Icon}
+                      className="h-3 w-3 text-muted-foreground"
+                    />
                   </button>
                   <button
                     type="button"
@@ -847,10 +956,16 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                     onClick={() => setFilterPanel("priority")}
                   >
                     <span className="flex items-center gap-2">
-                      <HugeiconsIcon icon={LayoutIcon} className="h-3.5 w-3.5 text-violet-400" />
+                      <HugeiconsIcon
+                        icon={LayoutIcon}
+                        className="h-3.5 w-3.5 text-violet-400"
+                      />
                       <span>Priority</span>
                     </span>
-                    <HugeiconsIcon icon={ArrowRight01Icon} className="h-3 w-3 text-muted-foreground" />
+                    <HugeiconsIcon
+                      icon={ArrowRight01Icon}
+                      className="h-3 w-3 text-muted-foreground"
+                    />
                   </button>
                   <button
                     type="button"
@@ -858,10 +973,16 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                     onClick={() => setFilterPanel("labels")}
                   >
                     <span className="flex items-center gap-2">
-                      <HugeiconsIcon icon={FileIcon} className="h-3.5 w-3.5 text-emerald-400" />
+                      <HugeiconsIcon
+                        icon={FileIcon}
+                        className="h-3.5 w-3.5 text-emerald-400"
+                      />
                       <span>Labels</span>
                     </span>
-                    <HugeiconsIcon icon={ArrowRight01Icon} className="h-3 w-3 text-muted-foreground" />
+                    <HugeiconsIcon
+                      icon={ArrowRight01Icon}
+                      className="h-3 w-3 text-muted-foreground"
+                    />
                   </button>
                 </div>
               )}
@@ -874,7 +995,10 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                       className="hover:bg-muted flex h-6 w-6 items-center justify-center rounded-full"
                       onClick={resetFilterPanel}
                     >
-                      <HugeiconsIcon icon={ArrowRight01Icon} className="h-3 w-3 rotate-180" />
+                      <HugeiconsIcon
+                        icon={ArrowRight01Icon}
+                        className="h-3 w-3 rotate-180"
+                      />
                     </button>
                     <span className="text-xs font-medium">
                       {filterPanel === "status" && "Status"}
@@ -903,7 +1027,9 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                   <div className="max-h-64 space-y-0.5 overflow-y-auto px-1 pb-1">
                     {filterPanel === "status" &&
                       ISSUE_STATUSES.filter((s) =>
-                        s.title.toLowerCase().includes(filterSearch.toLowerCase())
+                        s.title
+                          .toLowerCase()
+                          .includes(filterSearch.toLowerCase()),
                       ).map((s) => {
                         const count = projectIssuesByStatus[s.id]?.length ?? 0;
                         const active = statusFilter.includes(s.id);
@@ -913,19 +1039,21 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                             type="button"
                             onClick={() =>
                               setStatusFilter((prev) =>
-                                active ? prev.filter((id) => id !== s.id) : [...prev, s.id]
+                                active
+                                  ? prev.filter((id) => id !== s.id)
+                                  : [...prev, s.id],
                               )
                             }
                             className={cn(
                               "hover:bg-muted/60 flex w-full items-center justify-between rounded-md px-3 py-1.5 text-xs",
-                              active && "bg-primary/10 text-primary"
+                              active && "bg-primary/10 text-primary",
                             )}
                           >
                             <span className="flex items-center gap-2">
                               <span
                                 className={cn(
                                   "h-2 w-2 shrink-0 rounded-full",
-                                  s.iconColor
+                                  s.iconColor,
                                 )}
                               />
                               <span>{s.title}</span>
@@ -939,9 +1067,13 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
 
                     {filterPanel === "assignee" &&
                       USERS.filter((u) =>
-                        u.name.toLowerCase().includes(filterSearch.toLowerCase())
+                        u.name
+                          .toLowerCase()
+                          .includes(filterSearch.toLowerCase()),
                       ).map((u) => {
-                        const count = projectIssues.filter((i) => i.assigneeId === u.id).length;
+                        const count = projectIssues.filter(
+                          (i) => i.assigneeId === u.id,
+                        ).length;
                         const active = assigneeFilter.includes(u.id);
                         return (
                           <button
@@ -949,19 +1081,21 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                             type="button"
                             onClick={() =>
                               setAssigneeFilter((prev) =>
-                                active ? prev.filter((id) => id !== u.id) : [...prev, u.id]
+                                active
+                                  ? prev.filter((id) => id !== u.id)
+                                  : [...prev, u.id],
                               )
                             }
                             className={cn(
                               "hover:bg-muted/60 flex w-full items-center justify-between rounded-md px-3 py-1.5 text-xs",
-                              active && "bg-primary/10 text-primary"
+                              active && "bg-primary/10 text-primary",
                             )}
                           >
                             <span className="flex items-center gap-2">
                               <span
                                 className={cn(
-                                  "bg-linear-to-br flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-semibold text-white",
-                                  u.color
+                                  "flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-semibold text-white",
+                                  getUserColorClass(u.color),
                                 )}
                               >
                                 {u.initials}
@@ -978,10 +1112,12 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                     {filterPanel === "priority" &&
                       (["High", "Medium", "Low"] as Issue["priority"][])
                         .filter((p) =>
-                          p.toLowerCase().includes(filterSearch.toLowerCase())
+                          p.toLowerCase().includes(filterSearch.toLowerCase()),
                         )
                         .map((p) => {
-                          const count = projectIssues.filter((i) => i.priority === p).length;
+                          const count = projectIssues.filter(
+                            (i) => i.priority === p,
+                          ).length;
                           const active = priorityFilter.includes(p);
                           return (
                             <button
@@ -989,12 +1125,14 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                               type="button"
                               onClick={() =>
                                 setPriorityFilter((prev) =>
-                                  active ? prev.filter((val) => val !== p) : [...prev, p]
+                                  active
+                                    ? prev.filter((val) => val !== p)
+                                    : [...prev, p],
                                 )
                               }
                               className={cn(
                                 "hover:bg-muted/60 flex w-full items-center justify-between rounded-md px-3 py-1.5 text-xs",
-                                active && "bg-primary/10 text-primary"
+                                active && "bg-primary/10 text-primary",
                               )}
                             >
                               <span>{p}</span>
@@ -1007,10 +1145,12 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
 
                     {filterPanel === "labels" &&
                       LABEL_OPTIONS.filter((l) =>
-                        l.name.toLowerCase().includes(filterSearch.toLowerCase())
+                        l.name
+                          .toLowerCase()
+                          .includes(filterSearch.toLowerCase()),
                       ).map((l) => {
                         const count = projectIssues.filter((i) =>
-                          i.labels.some((lbl) => lbl.name === l.name)
+                          i.labels.some((lbl) => lbl.name === l.name),
                         ).length;
                         const active = labelFilter.includes(l.name);
                         return (
@@ -1021,12 +1161,12 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                               setLabelFilter((prev) =>
                                 active
                                   ? prev.filter((val) => val !== l.name)
-                                  : [...prev, l.name]
+                                  : [...prev, l.name],
                               )
                             }
                             className={cn(
                               "hover:bg-muted/60 flex w-full items-center justify-between rounded-md px-3 py-1.5 text-xs",
-                              active && "bg-primary/10 text-primary"
+                              active && "bg-primary/10 text-primary",
                             )}
                           >
                             <span>{l.name}</span>
@@ -1044,7 +1184,8 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
 
           <div className="ml-auto flex items-center gap-2">
             <span className="text-muted-foreground hidden text-[11px] sm:inline">
-              {filteredProjectIssues.length} task{filteredProjectIssues.length !== 1 ? "s" : ""}
+              {filteredProjectIssues.length} task
+              {filteredProjectIssues.length !== 1 ? "s" : ""}
             </span>
 
             <div className="border-border/80 bg-background/80 flex items-center rounded-full border px-0.5 py-0.5">
@@ -1066,7 +1207,10 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                 onClick={() => setViewMode("list")}
                 aria-label="List view"
               >
-                <HugeiconsIcon icon={MoreHorizontalCircle01Icon} className="h-3.5 w-3.5" />
+                <HugeiconsIcon
+                  icon={MoreHorizontalCircle01Icon}
+                  className="h-3.5 w-3.5"
+                />
               </Button>
             </div>
           </div>
@@ -1128,10 +1272,16 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                     onClick={() => setIssueFilterPanel("creator")}
                   >
                     <span className="flex items-center gap-2">
-                      <HugeiconsIcon icon={UserIcon} className="h-3.5 w-3.5 text-sky-400" />
+                      <HugeiconsIcon
+                        icon={UserIcon}
+                        className="h-3.5 w-3.5 text-sky-400"
+                      />
                       <span>Created by</span>
                     </span>
-                    <HugeiconsIcon icon={ArrowRight01Icon} className="h-3 w-3 text-muted-foreground" />
+                    <HugeiconsIcon
+                      icon={ArrowRight01Icon}
+                      className="h-3 w-3 text-muted-foreground"
+                    />
                   </button>
                   <button
                     type="button"
@@ -1139,10 +1289,16 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                     onClick={() => setIssueFilterPanel("status")}
                   >
                     <span className="flex items-center gap-2">
-                      <HugeiconsIcon icon={LayoutIcon} className="h-3.5 w-3.5 text-amber-400" />
+                      <HugeiconsIcon
+                        icon={LayoutIcon}
+                        className="h-3.5 w-3.5 text-amber-400"
+                      />
                       <span>Status</span>
                     </span>
-                    <HugeiconsIcon icon={ArrowRight01Icon} className="h-3 w-3 text-muted-foreground" />
+                    <HugeiconsIcon
+                      icon={ArrowRight01Icon}
+                      className="h-3 w-3 text-muted-foreground"
+                    />
                   </button>
                   <button
                     type="button"
@@ -1150,10 +1306,16 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                     onClick={() => setIssueFilterPanel("date")}
                   >
                     <span className="flex items-center gap-2">
-                      <HugeiconsIcon icon={FileIcon} className="h-3.5 w-3.5 text-violet-400" />
+                      <HugeiconsIcon
+                        icon={FileIcon}
+                        className="h-3.5 w-3.5 text-violet-400"
+                      />
                       <span>Date</span>
                     </span>
-                    <HugeiconsIcon icon={ArrowRight01Icon} className="h-3 w-3 text-muted-foreground" />
+                    <HugeiconsIcon
+                      icon={ArrowRight01Icon}
+                      className="h-3 w-3 text-muted-foreground"
+                    />
                   </button>
                 </div>
               )}
@@ -1166,7 +1328,10 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                       className="hover:bg-muted flex h-6 w-6 items-center justify-center rounded-full"
                       onClick={resetIssueFilterPanel}
                     >
-                      <HugeiconsIcon icon={ArrowRight01Icon} className="h-3 w-3 rotate-180" />
+                      <HugeiconsIcon
+                        icon={ArrowRight01Icon}
+                        className="h-3 w-3 rotate-180"
+                      />
                     </button>
                     <span className="text-xs font-medium">
                       {issueFilterPanel === "creator" && "Created by"}
@@ -1191,9 +1356,13 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                   <div className="max-h-64 space-y-0.5 overflow-y-auto px-1 pb-1">
                     {issueFilterPanel === "creator" &&
                       USERS.filter((u) =>
-                        u.name.toLowerCase().includes(issueFilterSearch.toLowerCase())
+                        u.name
+                          .toLowerCase()
+                          .includes(issueFilterSearch.toLowerCase()),
                       ).map((u) => {
-                        const count = projectIssues.filter((issue) => getIssueCreatorId(issue) === u.id).length;
+                        const count = projectIssues.filter(
+                          (issue) => getIssueCreatorId(issue) === u.id,
+                        ).length;
                         const active = creatorFilter.includes(u.id);
                         return (
                           <button
@@ -1201,35 +1370,43 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                             type="button"
                             onClick={() =>
                               setCreatorFilter((prev) =>
-                                active ? prev.filter((id) => id !== u.id) : [...prev, u.id]
+                                active
+                                  ? prev.filter((id) => id !== u.id)
+                                  : [...prev, u.id],
                               )
                             }
                             className={cn(
                               "hover:bg-muted/60 flex w-full items-center justify-between rounded-md px-3 py-1.5 text-xs",
-                              active && "bg-primary/10 text-primary"
+                              active && "bg-primary/10 text-primary",
                             )}
                           >
                             <span className="flex items-center gap-2">
                               <span
                                 className={cn(
-                                  "bg-linear-to-br flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-semibold text-white",
-                                  u.color
+                                  "flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-semibold text-white",
+                                  getUserColorClass(u.color),
                                 )}
                               >
                                 {u.initials}
                               </span>
                               <span>{u.name}</span>
                             </span>
-                            <span className="text-muted-foreground text-[11px]">{count}</span>
+                            <span className="text-muted-foreground text-[11px]">
+                              {count}
+                            </span>
                           </button>
                         );
                       })}
 
                     {issueFilterPanel === "status" &&
                       ISSUE_STATUSES.filter((s) =>
-                        s.title.toLowerCase().includes(issueFilterSearch.toLowerCase())
+                        s.title
+                          .toLowerCase()
+                          .includes(issueFilterSearch.toLowerCase()),
                       ).map((s) => {
-                        const count = projectIssues.filter((issue) => issue.statusId === s.id).length;
+                        const count = projectIssues.filter(
+                          (issue) => issue.statusId === s.id,
+                        ).length;
                         const active = issueStatusFilter.includes(s.id);
                         return (
                           <button
@@ -1237,28 +1414,43 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                             type="button"
                             onClick={() =>
                               setIssueStatusFilter((prev) =>
-                                active ? prev.filter((id) => id !== s.id) : [...prev, s.id]
+                                active
+                                  ? prev.filter((id) => id !== s.id)
+                                  : [...prev, s.id],
                               )
                             }
                             className={cn(
                               "hover:bg-muted/60 flex w-full items-center justify-between rounded-md px-3 py-1.5 text-xs",
-                              active && "bg-primary/10 text-primary"
+                              active && "bg-primary/10 text-primary",
                             )}
                           >
                             <span className="flex items-center gap-2">
-                              <span className={cn("h-2 w-2 shrink-0 rounded-full", s.iconColor)} />
+                              <span
+                                className={cn(
+                                  "h-2 w-2 shrink-0 rounded-full",
+                                  s.iconColor,
+                                )}
+                              />
                               <span>{s.title}</span>
                             </span>
-                            <span className="text-muted-foreground text-[11px]">{count}</span>
+                            <span className="text-muted-foreground text-[11px]">
+                              {count}
+                            </span>
                           </button>
                         );
                       })}
 
                     {issueFilterPanel === "date" &&
                       issueDateOptions
-                        .filter((date) => date.toLowerCase().includes(issueFilterSearch.toLowerCase()))
+                        .filter((date) =>
+                          date
+                            .toLowerCase()
+                            .includes(issueFilterSearch.toLowerCase()),
+                        )
                         .map((date) => {
-                          const count = projectIssues.filter((issue) => getIssueDateValue(issue) === date).length;
+                          const count = projectIssues.filter(
+                            (issue) => getIssueDateValue(issue) === date,
+                          ).length;
                           const active = issueDateFilter.includes(date);
                           return (
                             <button
@@ -1266,16 +1458,20 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                               type="button"
                               onClick={() =>
                                 setIssueDateFilter((prev) =>
-                                  active ? prev.filter((value) => value !== date) : [...prev, date]
+                                  active
+                                    ? prev.filter((value) => value !== date)
+                                    : [...prev, date],
                                 )
                               }
                               className={cn(
                                 "hover:bg-muted/60 flex w-full items-center justify-between rounded-md px-3 py-1.5 text-xs",
-                                active && "bg-primary/10 text-primary"
+                                active && "bg-primary/10 text-primary",
                               )}
                             >
                               <span>{date}</span>
-                              <span className="text-muted-foreground text-[11px]">{count}</span>
+                              <span className="text-muted-foreground text-[11px]">
+                                {count}
+                              </span>
                             </button>
                           );
                         })}
@@ -1296,7 +1492,8 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
 
           <div className="ml-auto flex items-center gap-2">
             <span className="text-muted-foreground hidden text-[11px] sm:inline">
-              {filteredIssuesPage.length} issue{filteredIssuesPage.length !== 1 ? "s" : ""}
+              {filteredIssuesPage.length} issue
+              {filteredIssuesPage.length !== 1 ? "s" : ""}
             </span>
             <Button
               type="button"
@@ -1367,10 +1564,16 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                     onClick={() => setPrFilterPanel("author")}
                   >
                     <span className="flex items-center gap-2">
-                      <HugeiconsIcon icon={UserIcon} className="h-3.5 w-3.5 text-sky-400" />
+                      <HugeiconsIcon
+                        icon={UserIcon}
+                        className="h-3.5 w-3.5 text-sky-400"
+                      />
                       <span>Created by</span>
                     </span>
-                    <HugeiconsIcon icon={ArrowRight01Icon} className="h-3 w-3 text-muted-foreground" />
+                    <HugeiconsIcon
+                      icon={ArrowRight01Icon}
+                      className="h-3 w-3 text-muted-foreground"
+                    />
                   </button>
                   <button
                     type="button"
@@ -1378,10 +1581,16 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                     onClick={() => setPrFilterPanel("status")}
                   >
                     <span className="flex items-center gap-2">
-                      <HugeiconsIcon icon={LayoutIcon} className="h-3.5 w-3.5 text-amber-400" />
+                      <HugeiconsIcon
+                        icon={LayoutIcon}
+                        className="h-3.5 w-3.5 text-amber-400"
+                      />
                       <span>Status</span>
                     </span>
-                    <HugeiconsIcon icon={ArrowRight01Icon} className="h-3 w-3 text-muted-foreground" />
+                    <HugeiconsIcon
+                      icon={ArrowRight01Icon}
+                      className="h-3 w-3 text-muted-foreground"
+                    />
                   </button>
                   <button
                     type="button"
@@ -1389,10 +1598,16 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                     onClick={() => setPrFilterPanel("date")}
                   >
                     <span className="flex items-center gap-2">
-                      <HugeiconsIcon icon={FileIcon} className="h-3.5 w-3.5 text-violet-400" />
+                      <HugeiconsIcon
+                        icon={FileIcon}
+                        className="h-3.5 w-3.5 text-violet-400"
+                      />
                       <span>Date</span>
                     </span>
-                    <HugeiconsIcon icon={ArrowRight01Icon} className="h-3 w-3 text-muted-foreground" />
+                    <HugeiconsIcon
+                      icon={ArrowRight01Icon}
+                      className="h-3 w-3 text-muted-foreground"
+                    />
                   </button>
                   <button
                     type="button"
@@ -1400,10 +1615,16 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                     onClick={() => setPrFilterPanel("project")}
                   >
                     <span className="flex items-center gap-2">
-                      <HugeiconsIcon icon={UserGroupIcon} className="h-3.5 w-3.5 text-emerald-400" />
+                      <HugeiconsIcon
+                        icon={UserGroupIcon}
+                        className="h-3.5 w-3.5 text-emerald-400"
+                      />
                       <span>Project</span>
                     </span>
-                    <HugeiconsIcon icon={ArrowRight01Icon} className="h-3 w-3 text-muted-foreground" />
+                    <HugeiconsIcon
+                      icon={ArrowRight01Icon}
+                      className="h-3 w-3 text-muted-foreground"
+                    />
                   </button>
                 </div>
               )}
@@ -1416,7 +1637,10 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                       className="hover:bg-muted flex h-6 w-6 items-center justify-center rounded-full"
                       onClick={resetPrFilterPanel}
                     >
-                      <HugeiconsIcon icon={ArrowRight01Icon} className="h-3 w-3 rotate-180" />
+                      <HugeiconsIcon
+                        icon={ArrowRight01Icon}
+                        className="h-3 w-3 rotate-180"
+                      />
                     </button>
                     <span className="text-xs font-medium">
                       {prFilterPanel === "author" && "Created by"}
@@ -1444,9 +1668,13 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                   <div className="max-h-64 space-y-0.5 overflow-y-auto px-1 pb-1">
                     {prFilterPanel === "author" &&
                       USERS.filter((u) =>
-                        u.name.toLowerCase().includes(prFilterSearch.toLowerCase())
+                        u.name
+                          .toLowerCase()
+                          .includes(prFilterSearch.toLowerCase()),
                       ).map((u) => {
-                        const count = projectPullRequests.filter((pr) => pr.authorId === u.id).length;
+                        const count = projectPullRequests.filter(
+                          (pr) => pr.authorId === u.id,
+                        ).length;
                         const active = prAuthorFilter.includes(u.id);
                         return (
                           <button
@@ -1454,35 +1682,45 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                             type="button"
                             onClick={() =>
                               setPrAuthorFilter((prev) =>
-                                active ? prev.filter((id) => id !== u.id) : [...prev, u.id]
+                                active
+                                  ? prev.filter((id) => id !== u.id)
+                                  : [...prev, u.id],
                               )
                             }
                             className={cn(
                               "hover:bg-muted/60 flex w-full items-center justify-between rounded-md px-3 py-1.5 text-xs",
-                              active && "bg-primary/10 text-primary"
+                              active && "bg-primary/10 text-primary",
                             )}
                           >
                             <span className="flex items-center gap-2">
                               <span
                                 className={cn(
-                                  "bg-linear-to-br flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-semibold text-white",
-                                  u.color
+                                  "flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-semibold text-white",
+                                  getUserColorClass(u.color),
                                 )}
                               >
                                 {u.initials}
                               </span>
                               <span>{u.name}</span>
                             </span>
-                            <span className="text-muted-foreground text-[11px]">{count}</span>
+                            <span className="text-muted-foreground text-[11px]">
+                              {count}
+                            </span>
                           </button>
                         );
                       })}
                     {prFilterPanel === "status" &&
                       (["open", "merged", "closed"] as PullRequest["status"][])
-                        .filter((status) => status.toLowerCase().includes(prFilterSearch.toLowerCase()))
+                        .filter((status) =>
+                          status
+                            .toLowerCase()
+                            .includes(prFilterSearch.toLowerCase()),
+                        )
                         .map((status) => {
                           const statusMeta = PR_STATUS_META[status];
-                          const count = projectPullRequests.filter((pr) => pr.status === status).length;
+                          const count = projectPullRequests.filter(
+                            (pr) => pr.status === status,
+                          ).length;
                           const active = prStatusFilter.includes(status);
                           return (
                             <button
@@ -1490,27 +1728,45 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                               type="button"
                               onClick={() =>
                                 setPrStatusFilter((prev) =>
-                                  active ? prev.filter((value) => value !== status) : [...prev, status]
+                                  active
+                                    ? prev.filter((value) => value !== status)
+                                    : [...prev, status],
                                 )
                               }
                               className={cn(
                                 "hover:bg-muted/60 flex w-full items-center justify-between rounded-md px-3 py-1.5 text-xs",
-                                active && "bg-primary/10 text-primary"
+                                active && "bg-primary/10 text-primary",
                               )}
                             >
-                              <span className={cn("inline-flex items-center gap-1.5", statusMeta.color)}>
-                                <HugeiconsIcon icon={statusMeta.icon} className="h-3.5 w-3.5" />
+                              <span
+                                className={cn(
+                                  "inline-flex items-center gap-1.5",
+                                  statusMeta.color,
+                                )}
+                              >
+                                <HugeiconsIcon
+                                  icon={statusMeta.icon}
+                                  className="h-3.5 w-3.5"
+                                />
                                 <span>{statusMeta.label}</span>
                               </span>
-                              <span className="text-muted-foreground text-[11px]">{count}</span>
+                              <span className="text-muted-foreground text-[11px]">
+                                {count}
+                              </span>
                             </button>
                           );
                         })}
                     {prFilterPanel === "date" &&
                       prDateOptions
-                        .filter((date) => date.toLowerCase().includes(prFilterSearch.toLowerCase()))
+                        .filter((date) =>
+                          date
+                            .toLowerCase()
+                            .includes(prFilterSearch.toLowerCase()),
+                        )
                         .map((date) => {
-                          const count = projectPullRequests.filter((pr) => pr.createdAt === date).length;
+                          const count = projectPullRequests.filter(
+                            (pr) => pr.createdAt === date,
+                          ).length;
                           const active = prDateFilter.includes(date);
                           return (
                             <button
@@ -1518,37 +1774,53 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                               type="button"
                               onClick={() =>
                                 setPrDateFilter((prev) =>
-                                  active ? prev.filter((value) => value !== date) : [...prev, date]
+                                  active
+                                    ? prev.filter((value) => value !== date)
+                                    : [...prev, date],
                                 )
                               }
                               className={cn(
                                 "hover:bg-muted/60 flex w-full items-center justify-between rounded-md px-3 py-1.5 text-xs",
-                                active && "bg-primary/10 text-primary"
+                                active && "bg-primary/10 text-primary",
                               )}
                             >
                               <span>{date}</span>
-                              <span className="text-muted-foreground text-[11px]">{count}</span>
+                              <span className="text-muted-foreground text-[11px]">
+                                {count}
+                              </span>
                             </button>
                           );
                         })}
                     {prFilterPanel === "project" &&
                       projects
-                        .filter((project) => project.name.toLowerCase().includes(prFilterSearch.toLowerCase()))
+                        .filter((project) =>
+                          project.name
+                            .toLowerCase()
+                            .includes(prFilterSearch.toLowerCase()),
+                        )
                         .map((project) => {
-                          const count = projectPullRequests.filter((pr) => pr.projectId === project.id).length;
+                          const count = projectPullRequests.filter(
+                            (pr) => pr.projectId === project.id,
+                          ).length;
                           const active = prProjectFilter === project.id;
                           return (
                             <button
                               key={project.id}
                               type="button"
-                              onClick={() => setPrProjectFilter((prev) => (prev === project.id ? "all" : project.id))}
+                              onClick={() =>
+                                setPrProjectFilter((prev) =>
+                                  prev === project.id ? "all" : project.id,
+                                )
+                              }
                               className={cn(
                                 "hover:bg-muted/60 flex w-full items-center justify-between rounded-md px-3 py-1.5 text-xs",
-                                active && "bg-primary/10 text-primary"
+                                active && "bg-primary/10 text-primary",
                               )}
                             >
                               <span>{project.name}</span>
-                              <span className="text-muted-foreground text-[11px]">{count}</span>
+                              <span className="text-muted-foreground text-[11px]">
+                                {count}
+                              </span>
                             </button>
                           );
                         })}
@@ -1569,7 +1841,8 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
 
           <div className="ml-auto flex items-center gap-2">
             <span className="text-muted-foreground hidden text-[11px] sm:inline">
-              {filteredProjectPullRequests.length} pull request{filteredProjectPullRequests.length !== 1 ? "s" : ""}
+              {filteredProjectPullRequests.length} pull request
+              {filteredProjectPullRequests.length !== 1 ? "s" : ""}
             </span>
             <Button
               type="button"
@@ -1637,10 +1910,16 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                     onClick={() => setTeamFilterPanel("member")}
                   >
                     <span className="flex items-center gap-2">
-                      <HugeiconsIcon icon={UserIcon} className="h-3.5 w-3.5 text-sky-400" />
+                      <HugeiconsIcon
+                        icon={UserIcon}
+                        className="h-3.5 w-3.5 text-sky-400"
+                      />
                       <span>Member</span>
                     </span>
-                    <HugeiconsIcon icon={ArrowRight01Icon} className="h-3 w-3 text-muted-foreground" />
+                    <HugeiconsIcon
+                      icon={ArrowRight01Icon}
+                      className="h-3 w-3 text-muted-foreground"
+                    />
                   </button>
                 </div>
               )}
@@ -1652,7 +1931,10 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                       className="hover:bg-muted flex h-6 w-6 items-center justify-center rounded-full"
                       onClick={resetTeamFilterPanel}
                     >
-                      <HugeiconsIcon icon={ArrowRight01Icon} className="h-3 w-3 rotate-180" />
+                      <HugeiconsIcon
+                        icon={ArrowRight01Icon}
+                        className="h-3 w-3 rotate-180"
+                      />
                     </button>
                     <span className="text-xs font-medium">Member</span>
                   </div>
@@ -1667,33 +1949,44 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                   <div className="max-h-64 space-y-0.5 overflow-y-auto px-1 pb-1">
                     {userDetails
                       .filter((user) =>
-                        user.name.toLowerCase().includes(teamFilterSearch.toLowerCase())
+                        user.name
+                          .toLowerCase()
+                          .includes(teamFilterSearch.toLowerCase()),
                       )
                       .map((user) => {
-                        const count = projectTeams.filter((team) => team.memberIds.includes(user.id)).length;
+                        const count = projectTeams.filter((team) =>
+                          team.memberIds.includes(user.id),
+                        ).length;
                         const active = teamMemberFilter.includes(user.id);
                         return (
                           <button
                             key={user.id}
                             type="button"
-                            onClick={() => toggleTeamMemberSelection(user.id, setTeamMemberFilter)}
+                            onClick={() =>
+                              toggleTeamMemberSelection(
+                                user.id,
+                                setTeamMemberFilter,
+                              )
+                            }
                             className={cn(
                               "hover:bg-muted/60 flex w-full items-center justify-between rounded-md px-3 py-1.5 text-xs",
-                              active && "bg-primary/10 text-primary"
+                              active && "bg-primary/10 text-primary",
                             )}
                           >
                             <span className="flex items-center gap-2">
                               <span
                                 className={cn(
-                                  "bg-linear-to-br flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-semibold text-white",
-                                  user.color
+                                  "flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-semibold text-white",
+                                  user.color,
                                 )}
                               >
                                 {user.initials}
                               </span>
                               <span>{user.name}</span>
                             </span>
-                            <span className="text-muted-foreground text-[11px]">{count}</span>
+                            <span className="text-muted-foreground text-[11px]">
+                              {count}
+                            </span>
                           </button>
                         );
                       })}
@@ -1714,7 +2007,8 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
 
           <div className="ml-auto flex items-center gap-2">
             <span className="text-muted-foreground hidden text-[11px] sm:inline">
-              {filteredProjectTeams.length} team{filteredProjectTeams.length !== 1 ? "s" : ""}
+              {filteredProjectTeams.length} team
+              {filteredProjectTeams.length !== 1 ? "s" : ""}
             </span>
             <Button
               type="button"
@@ -1783,10 +2077,16 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                     onClick={() => setMemberFilterPanel("team")}
                   >
                     <span className="flex items-center gap-2">
-                      <HugeiconsIcon icon={UserGroupIcon} className="h-3.5 w-3.5 text-sky-400" />
+                      <HugeiconsIcon
+                        icon={UserGroupIcon}
+                        className="h-3.5 w-3.5 text-sky-400"
+                      />
                       <span>Team</span>
                     </span>
-                    <HugeiconsIcon icon={ArrowRight01Icon} className="h-3 w-3 text-muted-foreground" />
+                    <HugeiconsIcon
+                      icon={ArrowRight01Icon}
+                      className="h-3 w-3 text-muted-foreground"
+                    />
                   </button>
                   <button
                     type="button"
@@ -1794,10 +2094,16 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                     onClick={() => setMemberFilterPanel("status")}
                   >
                     <span className="flex items-center gap-2">
-                      <HugeiconsIcon icon={UserIcon} className="h-3.5 w-3.5 text-violet-400" />
+                      <HugeiconsIcon
+                        icon={UserIcon}
+                        className="h-3.5 w-3.5 text-violet-400"
+                      />
                       <span>Status</span>
                     </span>
-                    <HugeiconsIcon icon={ArrowRight01Icon} className="h-3 w-3 text-muted-foreground" />
+                    <HugeiconsIcon
+                      icon={ArrowRight01Icon}
+                      className="h-3 w-3 text-muted-foreground"
+                    />
                   </button>
                 </div>
               )}
@@ -1809,7 +2115,10 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                       className="hover:bg-muted flex h-6 w-6 items-center justify-center rounded-full"
                       onClick={resetMemberFilterPanel}
                     >
-                      <HugeiconsIcon icon={ArrowRight01Icon} className="h-3 w-3 rotate-180" />
+                      <HugeiconsIcon
+                        icon={ArrowRight01Icon}
+                        className="h-3 w-3 rotate-180"
+                      />
                     </button>
                     <span className="text-xs font-medium">
                       {memberFilterPanel === "team" && "Team"}
@@ -1832,33 +2141,55 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                     {memberFilterPanel === "team" &&
                       projectTeams
                         .filter((team) =>
-                          team.name.toLowerCase().includes(memberFilterSearch.toLowerCase())
+                          team.name
+                            .toLowerCase()
+                            .includes(memberFilterSearch.toLowerCase()),
                         )
                         .map((team) => {
-                          const count = projectMembers.filter((member) => member.teamIds.includes(team.id)).length;
+                          const count = projectMembers.filter((member) =>
+                            member.teamIds.includes(team.id),
+                          ).length;
                           const active = memberTeamFilter.includes(team.id);
                           return (
                             <button
                               key={team.id}
                               type="button"
-                              onClick={() => toggleTeamMemberSelection(team.id, setMemberTeamFilter)}
+                              onClick={() =>
+                                toggleTeamMemberSelection(
+                                  team.id,
+                                  setMemberTeamFilter,
+                                )
+                              }
                               className={cn(
                                 "hover:bg-muted/60 flex w-full items-center justify-between rounded-md px-3 py-1.5 text-xs",
-                                active && "bg-primary/10 text-primary"
+                                active && "bg-primary/10 text-primary",
                               )}
                             >
                               <span>{team.name}</span>
-                              <span className="text-muted-foreground text-[11px]">{count}</span>
+                              <span className="text-muted-foreground text-[11px]">
+                                {count}
+                              </span>
                             </button>
                           );
                         })}
                     {memberFilterPanel === "status" &&
-                      (["member", "admin", "guest", "joined"] as UserDetail["status"][])
+                      (
+                        [
+                          "member",
+                          "admin",
+                          "guest",
+                          "joined",
+                        ] as UserDetail["status"][]
+                      )
                         .filter((status) =>
-                          status.toLowerCase().includes(memberFilterSearch.toLowerCase())
+                          status
+                            .toLowerCase()
+                            .includes(memberFilterSearch.toLowerCase()),
                         )
                         .map((status) => {
-                          const count = projectMembers.filter((member) => member.status === status).length;
+                          const count = projectMembers.filter(
+                            (member) => member.status === status,
+                          ).length;
                           const active = memberStatusFilter.includes(status);
                           return (
                             <button
@@ -1866,16 +2197,20 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                               type="button"
                               onClick={() =>
                                 setMemberStatusFilter((prev) =>
-                                  active ? prev.filter((value) => value !== status) : [...prev, status]
+                                  active
+                                    ? prev.filter((value) => value !== status)
+                                    : [...prev, status],
                                 )
                               }
                               className={cn(
                                 "hover:bg-muted/60 flex w-full items-center justify-between rounded-md px-3 py-1.5 text-xs",
-                                active && "bg-primary/10 text-primary"
+                                active && "bg-primary/10 text-primary",
                               )}
                             >
                               <span className="capitalize">{status}</span>
-                              <span className="text-muted-foreground text-[11px]">{count}</span>
+                              <span className="text-muted-foreground text-[11px]">
+                                {count}
+                              </span>
                             </button>
                           );
                         })}
@@ -1896,7 +2231,8 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
 
           <div className="ml-auto flex items-center gap-2">
             <span className="text-muted-foreground hidden text-[11px] sm:inline">
-              {filteredProjectMembers.length} member{filteredProjectMembers.length !== 1 ? "s" : ""}
+              {filteredProjectMembers.length} member
+              {filteredProjectMembers.length !== 1 ? "s" : ""}
             </span>
             <Button
               type="button"
@@ -1912,8 +2248,8 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
       )}
 
       <div className="flex-1 overflow-auto p-3 sm:p-4">
-        {section === "tasks" && (
-          viewMode === "board" ? (
+        {section === "tasks" &&
+          (viewMode === "board" ? (
             <div className="flex h-full min-w-max gap-3 sm:gap-4">
               {ISSUE_STATUSES.map((status) => {
                 const columnIssues = projectIssuesByStatus[status.id];
@@ -1927,7 +2263,10 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                     <CardHeader className="flex flex-row items-center justify-between gap-2 border-b border-border/60 py-2.5 px-3">
                       <div className="flex items-center gap-2">
                         <span
-                          className={cn("h-2 w-2 shrink-0 rounded-full", status.iconColor)}
+                          className={cn(
+                            "h-2 w-2 shrink-0 rounded-full",
+                            status.iconColor,
+                          )}
                         />
                         <CardTitle className="text-xs font-medium">
                           {status.title}
@@ -1944,7 +2283,10 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                           onClick={() => openCreate(status.id)}
                           aria-label={`Add task to ${status.title}`}
                         >
-                          <HugeiconsIcon icon={PlusSignIcon} className="h-4 w-4" />
+                          <HugeiconsIcon
+                            icon={PlusSignIcon}
+                            className="h-4 w-4"
+                          />
                         </Button>
                       </div>
                     </CardHeader>
@@ -1957,7 +2299,9 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                             isDragging={draggingId === issue.id}
                             onDragStart={(e) => handleDragStart(e, issue.id)}
                             onDragEnd={handleDragEnd}
-                            onStatusChange={(statusId) => changeStatus(issue.id, statusId)}
+                            onStatusChange={(statusId) =>
+                              changeStatus(issue.id, statusId)
+                            }
                             onAssignTo={(userId) => assignTo(issue.id, userId)}
                             onClick={() => openDetail(issue)}
                           />
@@ -1971,16 +2315,19 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
           ) : (
             <Card className="bg-card/80 ring-border/60 flex h-full min-w-full flex-col overflow-hidden">
               <CardHeader className="border-border/80 flex flex-row items-center justify-between gap-2 border-b py-2.5 px-3">
-                <CardTitle className="text-xs font-medium">Project tasks</CardTitle>
+                <CardTitle className="text-xs font-medium">
+                  Project tasks
+                </CardTitle>
                 <span className="text-muted-foreground text-[11px]">
-                  {filteredProjectIssues.length} task{filteredProjectIssues.length !== 1 ? "s" : ""}
+                  {filteredProjectIssues.length} task
+                  {filteredProjectIssues.length !== 1 ? "s" : ""}
                 </span>
               </CardHeader>
               <ScrollArea className="flex-1">
                 <CardContent className="flex flex-col gap-3 p-2">
                   {ISSUE_STATUSES.map((status) => {
                     const sectionIssues = filteredProjectIssues.filter(
-                      (issue) => issue.statusId === status.id
+                      (issue) => issue.statusId === status.id,
                     );
                     if (sectionIssues.length === 0) return null;
                     return (
@@ -1988,7 +2335,10 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                         <div className="flex items-center justify-between border-y border-border/60 bg-background/60 px-3 py-1.5">
                           <div className="flex items-center gap-2">
                             <span
-                              className={cn("h-2 w-2 shrink-0 rounded-full", status.iconColor)}
+                              className={cn(
+                                "h-2 w-2 shrink-0 rounded-full",
+                                status.iconColor,
+                              )}
                             />
                             <span className="text-xs font-medium">
                               {status.title}
@@ -2003,8 +2353,12 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                             <ProjectTaskRow
                               key={issue.id}
                               task={issue}
-                              onStatusChange={(statusId) => changeStatus(issue.id, statusId)}
-                              onAssignTo={(userId) => assignTo(issue.id, userId)}
+                              onStatusChange={(statusId) =>
+                                changeStatus(issue.id, statusId)
+                              }
+                              onAssignTo={(userId) =>
+                                assignTo(issue.id, userId)
+                              }
                               onClick={() => openDetail(issue)}
                             />
                           ))}
@@ -2015,8 +2369,7 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                 </CardContent>
               </ScrollArea>
             </Card>
-          )
-        )}
+          ))}
 
         {section === "issues" && (
           <Card className="bg-card/80 ring-border/60 flex h-full flex-col overflow-hidden">
@@ -2030,7 +2383,9 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                 <ProjectIssueRow
                   key={issue.id}
                   issue={issue}
-                  onPriorityChange={(priority) => changePriority(issue.id, priority)}
+                  onPriorityChange={(priority) =>
+                    changePriority(issue.id, priority)
+                  }
                   onClick={() => openDetail(issue)}
                   creatorId={getIssueCreatorId(issue)}
                   dateValue={getIssueDateValue(issue)}
@@ -2082,7 +2437,9 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                   <ProjectTeamRow
                     key={team.id}
                     team={team}
-                    members={userDetails.filter((user) => team.memberIds.includes(user.id))}
+                    members={userDetails.filter((user) =>
+                      team.memberIds.includes(user.id),
+                    )}
                     onClick={() => {
                       setDetailTeam(team);
                       setDetailTeamOpen(true);
@@ -2108,52 +2465,75 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
             </CardHeader>
             <CardContent className="flex-1 overflow-y-auto p-2">
               {filteredProjectMembers.length > 0 ? (
-                <div className="overflow-hidden rounded-md border border-border/60">
-                  <table className="w-full text-xs">
-                    <thead className="bg-muted/40">
-                      <tr>
-                        <th className="px-3 py-2 text-left font-medium">Member</th>
-                        <th className="px-3 py-2 text-left font-medium">Email</th>
-                        <th className="px-3 py-2 text-left font-medium">Status</th>
-                        <th className="px-3 py-2 text-left font-medium">Joined date</th>
-                        <th className="px-3 py-2 text-left font-medium">Teams</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredProjectMembers.map((member) => (
-                        <tr
-                          key={member.id}
-                          onClick={() => {
-                            setDetailMember(member as UserDetail & { joinedAt?: string });
-                            setDetailMemberOpen(true);
-                          }}
-                          className="hover:bg-muted/60 cursor-pointer border-t border-border/60"
-                        >
-                          <td className="px-3 py-2">
-                            <span className="flex items-center gap-2">
-                              <span
-                                className={cn(
-                                  "bg-linear-to-br flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-semibold text-white",
-                                  member.color
-                                )}
-                              >
-                                {member.initials}
-                              </span>
-                              <span>{member.name}</span>
-                            </span>
-                          </td>
-                          <td className="px-3 py-2">{member.email}</td>
-                          <td className="px-3 py-2 capitalize">{member.status}</td>
-                          <td className="px-3 py-2">{getMemberJoinedDate(member)}</td>
-                          <td className="px-3 py-2">
-                            {member.teamIds
-                              .map((teamId) => projectTeams.find((team) => team.id === teamId)?.name ?? teamId)
-                              .join(", ") || "No team"}
-                          </td>
+                <div className="flex-1 overflow-auto p-4">
+                  <div className="pm-table-wrap overflow-x-auto">
+                    <table className="w-full border-collapse">
+                      <thead>
+                        <tr>
+                          <th className="px-3 py-2 text-left font-medium">
+                            Member
+                          </th>
+                          <th className="px-3 py-2 text-left font-medium">
+                            Email
+                          </th>
+                          <th className="px-3 py-2 text-left font-medium">
+                            Status
+                          </th>
+                          <th className="px-3 py-2 text-left font-medium">
+                            Joined date
+                          </th>
+                          <th className="px-3 py-2 text-left font-medium">
+                            Teams
+                          </th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {filteredProjectMembers.map((member) => (
+                          <tr
+                            key={member.id}
+                            onClick={() => {
+                              setDetailMember(
+                                member as UserDetail & { joinedAt?: string },
+                              );
+                              setDetailMemberOpen(true);
+                            }}
+                            className="hover:bg-muted/60 cursor-pointer border-t border-border/60"
+                          >
+                            <td className="px-3 py-2">
+                              <span className="flex items-center gap-2">
+                                <span
+                                  className={cn(
+                                    "flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-semibold text-white",
+                                    getUserColorClass(member.color),
+                                  )}
+                                >
+                                  {member.initials}
+                                </span>
+                                <span>{member.name}</span>
+                              </span>
+                            </td>
+                            <td className="px-3 py-2">{member.email}</td>
+                            <td className="px-3 py-2 capitalize">
+                              {member.status}
+                            </td>
+                            <td className="px-3 py-2">
+                              {getMemberJoinedDate(member)}
+                            </td>
+                            <td className="px-3 py-2">
+                              {member.teamIds
+                                .map(
+                                  (teamId) =>
+                                    projectTeams.find(
+                                      (team) => team.id === teamId,
+                                    )?.name ?? teamId,
+                                )
+                                .join(", ") || "No team"}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               ) : (
                 <p className="text-muted-foreground py-4 text-center text-xs">
@@ -2212,25 +2592,39 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
               <Label>Priority</Label>
               <Select
                 value={projectIssuePriority}
-                onValueChange={(value) => setProjectIssuePriority(value as Issue["priority"])}
+                onValueChange={(value) =>
+                  setProjectIssuePriority(value as Issue["priority"])
+                }
               >
                 <SelectTrigger className="h-8 text-xs">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="High" className="text-xs">High</SelectItem>
-                  <SelectItem value="Medium" className="text-xs">Medium</SelectItem>
-                  <SelectItem value="Low" className="text-xs">Low</SelectItem>
+                  <SelectItem value="High" className="text-xs">
+                    High
+                  </SelectItem>
+                  <SelectItem value="Medium" className="text-xs">
+                    Medium
+                  </SelectItem>
+                  <SelectItem value="Low" className="text-xs">
+                    Low
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setProjectIssueCreateOpen(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setProjectIssueCreateOpen(false)}
+              >
                 Cancel
               </Button>
               <Button
                 type="submit"
-                disabled={!projectIssueTitle.trim() || !projectIssueDescription.trim()}
+                disabled={
+                  !projectIssueTitle.trim() || !projectIssueDescription.trim()
+                }
               >
                 Create
               </Button>
@@ -2280,25 +2674,39 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
               <Label>Status</Label>
               <Select
                 value={projectPrStatus}
-                onValueChange={(value) => setProjectPrStatus(value as PullRequest["status"])}
+                onValueChange={(value) =>
+                  setProjectPrStatus(value as PullRequest["status"])
+                }
               >
                 <SelectTrigger className="h-8 text-xs">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="open" className="text-xs">Open</SelectItem>
-                  <SelectItem value="merged" className="text-xs">Merged</SelectItem>
-                  <SelectItem value="closed" className="text-xs">Closed</SelectItem>
+                  <SelectItem value="open" className="text-xs">
+                    Open
+                  </SelectItem>
+                  <SelectItem value="merged" className="text-xs">
+                    Merged
+                  </SelectItem>
+                  <SelectItem value="closed" className="text-xs">
+                    Closed
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setProjectPrCreateOpen(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setProjectPrCreateOpen(false)}
+              >
                 Cancel
               </Button>
               <Button
                 type="submit"
-                disabled={!projectPrTitle.trim() || !projectPrDescription.trim()}
+                disabled={
+                  !projectPrTitle.trim() || !projectPrDescription.trim()
+                }
               >
                 Create
               </Button>
@@ -2316,7 +2724,9 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>
-              {detailPullRequest ? `PR #${detailPullRequest.number}` : "Pull request details"}
+              {detailPullRequest
+                ? `PR #${detailPullRequest.number}`
+                : "Pull request details"}
             </DialogTitle>
           </DialogHeader>
           {detailPullRequest && (
@@ -2328,7 +2738,9 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                   value={detailPullRequest.title}
                   onChange={(e) => {
                     const value = e.target.value;
-                    setDetailPullRequest((prev) => (prev ? { ...prev, title: value } : prev));
+                    setDetailPullRequest((prev) =>
+                      prev ? { ...prev, title: value } : prev,
+                    );
                   }}
                   className="text-sm"
                 />
@@ -2340,7 +2752,9 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                   value={detailPullRequest.description}
                   onChange={(e) => {
                     const value = e.target.value;
-                    setDetailPullRequest((prev) => (prev ? { ...prev, description: value } : prev));
+                    setDetailPullRequest((prev) =>
+                      prev ? { ...prev, description: value } : prev,
+                    );
                   }}
                   className="border-input bg-background focus-visible:ring-ring/50 min-h-[100px] w-full rounded-md border px-3 py-2 text-sm outline-none focus-visible:ring-1"
                 />
@@ -2352,36 +2766,52 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                     value={detailPullRequest.status}
                     onValueChange={(value) => {
                       const next = value as PullRequest["status"];
-                      setDetailPullRequest((prev) => (prev ? { ...prev, status: next } : prev));
+                      setDetailPullRequest((prev) =>
+                        prev ? { ...prev, status: next } : prev,
+                      );
                     }}
                   >
                     <SelectTrigger className="h-8 text-xs">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="open" className="text-xs">Open</SelectItem>
-                      <SelectItem value="merged" className="text-xs">Merged</SelectItem>
-                      <SelectItem value="closed" className="text-xs">Closed</SelectItem>
+                      <SelectItem value="open" className="text-xs">
+                        Open
+                      </SelectItem>
+                      <SelectItem value="merged" className="text-xs">
+                        Merged
+                      </SelectItem>
+                      <SelectItem value="closed" className="text-xs">
+                        Closed
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>Created by</Label>
                   <div className="text-muted-foreground rounded-md border border-border/60 bg-muted/30 px-3 py-2 text-xs">
-                    {USERS.find((u) => u.id === detailPullRequest.authorId)?.name ?? "Unknown user"}
+                    {USERS.find((u) => u.id === detailPullRequest.authorId)
+                      ?.name ?? "Unknown user"}
                   </div>
                 </div>
               </div>
               <div className="text-muted-foreground text-[11px]">
-                Opened {detailPullRequest.createdAt} · Updated {detailPullRequest.updatedAt}
+                Opened {detailPullRequest.createdAt} · Updated{" "}
+                {detailPullRequest.updatedAt}
               </div>
               <DialogFooter>
-                <Button variant="outline" onClick={() => setDetailPullRequestOpen(false)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setDetailPullRequestOpen(false)}
+                >
                   Cancel
                 </Button>
                 <Button
                   onClick={confirmPullRequestChanges}
-                  disabled={!detailPullRequest.title.trim() || !detailPullRequest.description.trim()}
+                  disabled={
+                    !detailPullRequest.title.trim() ||
+                    !detailPullRequest.description.trim()
+                  }
                 >
                   Confirm
                 </Button>
@@ -2422,7 +2852,9 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
               <Input
                 id="team-create-identifier"
                 value={teamCreateIdentifier}
-                onChange={(e) => setTeamCreateIdentifier(e.target.value.toUpperCase())}
+                onChange={(e) =>
+                  setTeamCreateIdentifier(e.target.value.toUpperCase())
+                }
                 placeholder="e.g. DS"
                 required
                 className="text-sm"
@@ -2437,34 +2869,53 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                     <button
                       key={user.id}
                       type="button"
-                      onClick={() => toggleTeamMemberSelection(user.id, setTeamCreateMemberIds)}
+                      onClick={() =>
+                        toggleTeamMemberSelection(
+                          user.id,
+                          setTeamCreateMemberIds,
+                        )
+                      }
                       className={cn(
                         "hover:bg-muted/60 flex w-full items-center justify-between rounded-md px-2 py-1.5 text-xs",
-                        active && "bg-primary/10 text-primary"
+                        active && "bg-primary/10 text-primary",
                       )}
                     >
                       <span className="flex items-center gap-2">
                         <span
                           className={cn(
-                            "bg-linear-to-br flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-semibold text-white",
-                            user.color
+                            "flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-semibold text-white",
+                            user.color,
                           )}
                         >
                           {user.initials}
                         </span>
                         <span>{user.name}</span>
                       </span>
-                      {active && <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-3.5 w-3.5" />}
+                      {active && (
+                        <HugeiconsIcon
+                          icon={CheckmarkCircle01Icon}
+                          className="h-3.5 w-3.5"
+                        />
+                      )}
                     </button>
                   );
                 })}
               </div>
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setTeamCreateOpen(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setTeamCreateOpen(false)}
+              >
                 Cancel
               </Button>
-              <Button type="submit" disabled={!teamCreateName.trim() || !teamCreateIdentifier.trim()}>
+              <Button
+                type="submit"
+                disabled={
+                  !teamCreateName.trim() || !teamCreateIdentifier.trim()
+                }
+              >
                 Create
               </Button>
             </DialogFooter>
@@ -2494,7 +2945,9 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                   value={detailTeam.name}
                   onChange={(e) => {
                     const value = e.target.value;
-                    setDetailTeam((prev) => (prev ? { ...prev, name: value } : prev));
+                    setDetailTeam((prev) =>
+                      prev ? { ...prev, name: value } : prev,
+                    );
                   }}
                   className="text-sm"
                 />
@@ -2506,7 +2959,9 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                   value={detailTeam.identifier}
                   onChange={(e) => {
                     const value = e.target.value.toUpperCase();
-                    setDetailTeam((prev) => (prev ? { ...prev, identifier: value } : prev));
+                    setDetailTeam((prev) =>
+                      prev ? { ...prev, identifier: value } : prev,
+                    );
                   }}
                   className="text-sm"
                 />
@@ -2522,27 +2977,36 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                         type="button"
                         onClick={() => {
                           const nextMemberIds = active
-                            ? detailTeam.memberIds.filter((id) => id !== user.id)
+                            ? detailTeam.memberIds.filter(
+                                (id) => id !== user.id,
+                              )
                             : [...detailTeam.memberIds, user.id];
-                          setDetailTeam((prev) => (prev ? { ...prev, memberIds: nextMemberIds } : prev));
+                          setDetailTeam((prev) =>
+                            prev ? { ...prev, memberIds: nextMemberIds } : prev,
+                          );
                         }}
                         className={cn(
                           "hover:bg-muted/60 flex w-full items-center justify-between rounded-md px-2 py-1.5 text-xs",
-                          active && "bg-primary/10 text-primary"
+                          active && "bg-primary/10 text-primary",
                         )}
                       >
                         <span className="flex items-center gap-2">
                           <span
                             className={cn(
-                              "bg-linear-to-br flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-semibold text-white",
-                              user.color
+                              "flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-semibold text-white",
+                              user.color,
                             )}
                           >
                             {user.initials}
                           </span>
                           <span>{user.name}</span>
                         </span>
-                        {active && <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-3.5 w-3.5" />}
+                        {active && (
+                          <HugeiconsIcon
+                            icon={CheckmarkCircle01Icon}
+                            className="h-3.5 w-3.5"
+                          />
+                        )}
                       </button>
                     );
                   })}
@@ -2557,7 +3021,11 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                 >
                   Delete team
                 </Button>
-                <Button type="button" variant="outline" onClick={confirmTeamChanges}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={confirmTeamChanges}
+                >
                   Confirm
                 </Button>
               </div>
@@ -2565,12 +3033,16 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
           )}
         </DialogContent>
       </Dialog>
-      <AlertDialog open={teamDeleteConfirmOpen} onOpenChange={setTeamDeleteConfirmOpen}>
+      <AlertDialog
+        open={teamDeleteConfirmOpen}
+        onOpenChange={setTeamDeleteConfirmOpen}
+      >
         <AlertDialogContent size="sm">
           <AlertDialogHeader>
             <AlertDialogTitle>Delete team?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently remove the team from this workspace and project.
+              This will permanently remove the team from this workspace and
+              project.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -2632,30 +3104,40 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                 <Label>Status</Label>
                 <Select
                   value={memberCreateStatus}
-                  onValueChange={(value) => setMemberCreateStatus(value as UserDetail["status"])}
+                  onValueChange={(value) =>
+                    setMemberCreateStatus(value as UserDetail["status"])
+                  }
                 >
                   <SelectTrigger className="h-8 text-xs">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="member" className="text-xs">Member</SelectItem>
-                    <SelectItem value="admin" className="text-xs">Admin</SelectItem>
-                    <SelectItem value="guest" className="text-xs">Guest</SelectItem>
-                    <SelectItem value="joined" className="text-xs">Joined</SelectItem>
+                    <SelectItem value="member" className="text-xs">
+                      Member
+                    </SelectItem>
+                    <SelectItem value="admin" className="text-xs">
+                      Admin
+                    </SelectItem>
+                    <SelectItem value="guest" className="text-xs">
+                      Guest
+                    </SelectItem>
+                    <SelectItem value="joined" className="text-xs">
+                      Joined
+                    </SelectItem>
                   </SelectContent>
                 </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="member-create-joined-date">Joined date</Label>
-                  <Input
-                    id="member-create-joined-date"
-                    type="date"
-                    value={memberCreateJoinedDate}
-                    onChange={(e) => setMemberCreateJoinedDate(e.target.value)}
-                    className="text-sm"
-                  />
-                </div>
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="member-create-joined-date">Joined date</Label>
+                <Input
+                  id="member-create-joined-date"
+                  type="date"
+                  value={memberCreateJoinedDate}
+                  onChange={(e) => setMemberCreateJoinedDate(e.target.value)}
+                  className="text-sm"
+                />
+              </div>
+            </div>
             <div className="space-y-2">
               <Label>Teams</Label>
               <div className="max-h-48 space-y-1 overflow-y-auto rounded-md border border-border/60 p-2">
@@ -2665,14 +3147,24 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                     <button
                       key={team.id}
                       type="button"
-                      onClick={() => toggleTeamMemberSelection(team.id, setMemberCreateTeamIds)}
+                      onClick={() =>
+                        toggleTeamMemberSelection(
+                          team.id,
+                          setMemberCreateTeamIds,
+                        )
+                      }
                       className={cn(
                         "hover:bg-muted/60 flex w-full items-center justify-between rounded-md px-2 py-1.5 text-xs",
-                        active && "bg-primary/10 text-primary"
+                        active && "bg-primary/10 text-primary",
                       )}
                     >
                       <span>{team.name}</span>
-                      {active && <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-3.5 w-3.5" />}
+                      {active && (
+                        <HugeiconsIcon
+                          icon={CheckmarkCircle01Icon}
+                          className="h-3.5 w-3.5"
+                        />
+                      )}
                     </button>
                   );
                 })}
@@ -2684,10 +3176,17 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
               </div>
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setMemberCreateOpen(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setMemberCreateOpen(false)}
+              >
                 Cancel
               </Button>
-              <Button type="submit" disabled={!memberCreateName.trim() || !memberCreateEmail.trim()}>
+              <Button
+                type="submit"
+                disabled={!memberCreateName.trim() || !memberCreateEmail.trim()}
+              >
                 Create
               </Button>
             </DialogFooter>
@@ -2717,7 +3216,9 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                   value={detailMember.name}
                   onChange={(e) => {
                     const value = e.target.value;
-                    setDetailMember((prev) => (prev ? { ...prev, name: value } : prev));
+                    setDetailMember((prev) =>
+                      prev ? { ...prev, name: value } : prev,
+                    );
                   }}
                   className="text-sm"
                 />
@@ -2730,7 +3231,9 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                   value={detailMember.email}
                   onChange={(e) => {
                     const value = e.target.value;
-                    setDetailMember((prev) => (prev ? { ...prev, email: value } : prev));
+                    setDetailMember((prev) =>
+                      prev ? { ...prev, email: value } : prev,
+                    );
                   }}
                   className="text-sm"
                 />
@@ -2741,17 +3244,27 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                   value={detailMember.status}
                   onValueChange={(value) => {
                     const next = value as UserDetail["status"];
-                    setDetailMember((prev) => (prev ? { ...prev, status: next } : prev));
+                    setDetailMember((prev) =>
+                      prev ? { ...prev, status: next } : prev,
+                    );
                   }}
                 >
                   <SelectTrigger className="h-8 text-xs">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="member" className="text-xs">Member</SelectItem>
-                    <SelectItem value="admin" className="text-xs">Admin</SelectItem>
-                    <SelectItem value="guest" className="text-xs">Guest</SelectItem>
-                    <SelectItem value="joined" className="text-xs">Joined</SelectItem>
+                    <SelectItem value="member" className="text-xs">
+                      Member
+                    </SelectItem>
+                    <SelectItem value="admin" className="text-xs">
+                      Admin
+                    </SelectItem>
+                    <SelectItem value="guest" className="text-xs">
+                      Guest
+                    </SelectItem>
+                    <SelectItem value="joined" className="text-xs">
+                      Joined
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -2760,10 +3273,15 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                 <Input
                   id="member-detail-joined-date"
                   type="date"
-                  value={(detailMember as UserDetail & { joinedAt?: string }).joinedAt ?? ""}
+                  value={
+                    (detailMember as UserDetail & { joinedAt?: string })
+                      .joinedAt ?? ""
+                  }
                   onChange={(e) => {
                     const value = e.target.value;
-                    setDetailMember((prev) => (prev ? { ...prev, joinedAt: value } : prev));
+                    setDetailMember((prev) =>
+                      prev ? { ...prev, joinedAt: value } : prev,
+                    );
                   }}
                   className="text-sm"
                 />
@@ -2779,17 +3297,26 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                         type="button"
                         onClick={() => {
                           const nextTeamIds = active
-                            ? detailMember.teamIds.filter((id) => id !== team.id)
+                            ? detailMember.teamIds.filter(
+                                (id) => id !== team.id,
+                              )
                             : [...detailMember.teamIds, team.id];
-                          setDetailMember((prev) => (prev ? { ...prev, teamIds: nextTeamIds } : prev));
+                          setDetailMember((prev) =>
+                            prev ? { ...prev, teamIds: nextTeamIds } : prev,
+                          );
                         }}
                         className={cn(
                           "hover:bg-muted/60 flex w-full items-center justify-between rounded-md px-2 py-1.5 text-xs",
-                          active && "bg-primary/10 text-primary"
+                          active && "bg-primary/10 text-primary",
                         )}
                       >
                         <span>{team.name}</span>
-                        {active && <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-3.5 w-3.5" />}
+                        {active && (
+                          <HugeiconsIcon
+                            icon={CheckmarkCircle01Icon}
+                            className="h-3.5 w-3.5"
+                          />
+                        )}
                       </button>
                     );
                   })}
@@ -2801,22 +3328,36 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                   <table className="w-full text-xs">
                     <tbody>
                       <tr className="border-b border-border/60">
-                        <td className="bg-muted/40 px-3 py-2 font-medium">Name</td>
+                        <td className="bg-muted/40 px-3 py-2 font-medium">
+                          Name
+                        </td>
                         <td className="px-3 py-2">{detailMember.name}</td>
                       </tr>
                       <tr className="border-b border-border/60">
-                        <td className="bg-muted/40 px-3 py-2 font-medium">Email</td>
+                        <td className="bg-muted/40 px-3 py-2 font-medium">
+                          Email
+                        </td>
                         <td className="px-3 py-2">{detailMember.email}</td>
                       </tr>
                       <tr className="border-b border-border/60">
-                        <td className="bg-muted/40 px-3 py-2 font-medium">Joined date</td>
-                        <td className="px-3 py-2">{getMemberJoinedDate(detailMember)}</td>
+                        <td className="bg-muted/40 px-3 py-2 font-medium">
+                          Joined date
+                        </td>
+                        <td className="px-3 py-2">
+                          {getMemberJoinedDate(detailMember)}
+                        </td>
                       </tr>
                       <tr>
-                        <td className="bg-muted/40 px-3 py-2 font-medium">Teams</td>
+                        <td className="bg-muted/40 px-3 py-2 font-medium">
+                          Teams
+                        </td>
                         <td className="px-3 py-2">
                           {detailMember.teamIds
-                            .map((teamId) => projectTeams.find((team) => team.id === teamId)?.name ?? teamId)
+                            .map(
+                              (teamId) =>
+                                projectTeams.find((team) => team.id === teamId)
+                                  ?.name ?? teamId,
+                            )
                             .join(", ") || "No team"}
                         </td>
                       </tr>
@@ -2837,7 +3378,9 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                   type="button"
                   variant="outline"
                   onClick={confirmMemberChanges}
-                  disabled={!detailMember.name.trim() || !detailMember.email.trim()}
+                  disabled={
+                    !detailMember.name.trim() || !detailMember.email.trim()
+                  }
                 >
                   Confirm
                 </Button>
@@ -2846,12 +3389,16 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
           )}
         </DialogContent>
       </Dialog>
-      <AlertDialog open={memberDeleteConfirmOpen} onOpenChange={setMemberDeleteConfirmOpen}>
+      <AlertDialog
+        open={memberDeleteConfirmOpen}
+        onOpenChange={setMemberDeleteConfirmOpen}
+      >
         <AlertDialogContent size="sm">
           <AlertDialogHeader>
             <AlertDialogTitle>Delete member?</AlertDialogTitle>
             <AlertDialogDescription>
-              This member will be removed from the workspace and all linked teams.
+              This member will be removed from the workspace and all linked
+              teams.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -2868,7 +3415,11 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
         </AlertDialogContent>
       </AlertDialog>
       <IssueDetailDialog
-        issue={detailIssue ? (issues.find((i) => i.id === detailIssue.id) ?? detailIssue) : null}
+        issue={
+          detailIssue
+            ? (issues.find((i) => i.id === detailIssue.id) ?? detailIssue)
+            : null
+        }
         open={detailOpen}
         onOpenChange={setDetailOpen}
       />
@@ -2883,11 +3434,7 @@ function ScrollArea({
   children: React.ReactNode;
   className?: string;
 }) {
-  return (
-    <div className={cn("overflow-y-auto", className)}>
-      {children}
-    </div>
-  );
+  return <div className={cn("overflow-y-auto", className)}>{children}</div>;
 }
 
 function ProjectTaskCard({
@@ -2921,7 +3468,7 @@ function ProjectTaskCard({
       onClick={onClick}
       className={cn(
         "hover:bg-muted/80 flex cursor-grab flex-col gap-1.5 rounded-md border border-border/60 bg-background/80 p-2.5 text-left transition-colors active:cursor-grabbing",
-        isDragging && "opacity-60"
+        isDragging && "opacity-60",
       )}
     >
       <div className="flex items-start justify-between gap-2">
@@ -2936,7 +3483,12 @@ function ProjectTaskCard({
             }}
           >
             <SelectTrigger className="h-6 w-auto gap-1 border-0 bg-transparent px-1.5 shadow-none hover:bg-muted/80 text-[10px]">
-              <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", status?.iconColor)} />
+              <span
+                className={cn(
+                  "h-1.5 w-1.5 shrink-0 rounded-full",
+                  status?.iconColor,
+                )}
+              />
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -2983,7 +3535,7 @@ function ProjectTaskCard({
               <span
                 className={cn(
                   "flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-semibold text-white",
-                  assignee ? `bg-linear-to-br ${assignee.color}` : "bg-muted"
+                  assignee ? getUserColorClass(assignee.color) : "bg-muted",
                 )}
               >
                 {assignee?.initials ?? "?"}
@@ -2999,13 +3551,20 @@ function ProjectTaskCard({
                   <span
                     className={cn(
                       "shrink-0 flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-semibold text-white",
-                      `bg-linear-to-br ${u.color}`
+                      getUserColorClass(u.color),
                     )}
                   >
                     {u.initials}
                   </span>
                   {u.name}
-                  {assignee?.initials === u.initials && <span><HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-1 w-1" /></span>}
+                  {assignee?.initials === u.initials && (
+                    <span>
+                      <HugeiconsIcon
+                        icon={CheckmarkCircle01Icon}
+                        className="h-1 w-1"
+                      />
+                    </span>
+                  )}
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
@@ -3071,7 +3630,12 @@ function ProjectTaskRow({
           }}
         >
           <SelectTrigger className="h-7 w-[120px] gap-1 border-0 bg-transparent px-1.5 text-[10px] shadow-none hover:bg-muted/80">
-            <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", status?.iconColor)} />
+            <span
+              className={cn(
+                "h-1.5 w-1.5 shrink-0 rounded-full",
+                status?.iconColor,
+              )}
+            />
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -3104,7 +3668,7 @@ function ProjectTaskRow({
               <span
                 className={cn(
                   "flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-semibold text-white",
-                  assignee ? `bg-linear-to-br ${assignee.color}` : "bg-muted"
+                  assignee ? getUserColorClass(assignee.color) : "bg-muted",
                 )}
               >
                 {assignee?.initials ?? "?"}
@@ -3112,14 +3676,11 @@ function ProjectTaskRow({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               {USERS.map((u) => (
-                <DropdownMenuItem
-                  key={u.id}
-                  onClick={() => onAssignTo(u.id)}
-                >
+                <DropdownMenuItem key={u.id} onClick={() => onAssignTo(u.id)}>
                   <span
                     className={cn(
                       "mr-2 flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-semibold text-white",
-                      `bg-linear-to-br ${u.color}`
+                      getUserColorClass(u.color),
                     )}
                   >
                     {u.initials}
@@ -3161,15 +3722,13 @@ function ProjectTeamRow({
         </div>
       </div>
       <Tooltip>
-        <TooltipTrigger
-          render={<div className="flex items-center gap-1.5" />}
-        >
+        <TooltipTrigger render={<div className="flex items-center gap-1.5" />}>
           {visibleMembers.map((member) => (
             <span
               key={member.id}
               className={cn(
-                "bg-linear-to-br flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-semibold text-white",
-                member.color
+                "flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-semibold text-white",
+                getUserColorClass(member.color),
               )}
             >
               {member.initials}
@@ -3216,7 +3775,7 @@ function ProjectPullRequestRow({
           <span
             className={cn(
               "inline-flex items-center gap-1 rounded-full border border-border/60 bg-muted/30 px-2 py-0.5",
-              statusMeta.color
+              statusMeta.color,
             )}
           >
             <HugeiconsIcon icon={statusMeta.icon} className="h-3 w-3" />
@@ -3231,11 +3790,13 @@ function ProjectPullRequestRow({
       <div className="flex min-w-[110px] items-center justify-end gap-2">
         {author && (
           <>
-            <span className="text-muted-foreground text-[11px]">{author.name}</span>
+            <span className="text-muted-foreground text-[11px]">
+              {author.name}
+            </span>
             <span
               className={cn(
-                "bg-linear-to-br flex h-7 w-7 items-center justify-center rounded-full text-[10px] font-semibold text-white",
-                author.color
+                "flex h-7 w-7 items-center justify-center rounded-full text-[10px] font-semibold text-white",
+                getUserColorClass(author.color),
               )}
             >
               {author.initials}
@@ -3304,9 +3865,15 @@ function ProjectIssueRow({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="High" className="text-xs">High</SelectItem>
-            <SelectItem value="Medium" className="text-xs">Medium</SelectItem>
-            <SelectItem value="Low" className="text-xs">Low</SelectItem>
+            <SelectItem value="High" className="text-xs">
+              High
+            </SelectItem>
+            <SelectItem value="Medium" className="text-xs">
+              Medium
+            </SelectItem>
+            <SelectItem value="Low" className="text-xs">
+              Low
+            </SelectItem>
           </SelectContent>
         </Select>
       </div>

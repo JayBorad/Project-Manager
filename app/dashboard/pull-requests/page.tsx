@@ -26,7 +26,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { USERS } from "@/lib/data";
-import { cn } from "@/lib/utils";
+import { cn, getUserColorClass } from "@/lib/utils";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   PlusSignIcon,
@@ -595,8 +595,8 @@ function ProjectPullRequestRow({
             <span className="text-muted-foreground text-[11px]">{author.name}</span>
             <span
               className={cn(
-                "bg-linear-to-br flex h-7 w-7 items-center justify-center rounded-full text-[10px] font-semibold text-white",
-                author.color
+                "flex h-7 w-7 items-center justify-center rounded-full text-[10px] font-semibold text-white",
+                getUserColorClass(author.color)
               )}
             >
               {author.initials}

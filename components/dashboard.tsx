@@ -1078,7 +1078,7 @@ function IssuesView() {
                         {["PB", "JD", "AK", "MS"][index % 4]}
                       </div>
                       <span className="truncate">
-                        {["Pavan Borad", "Jane Doe", "Alex Kim", "Maria Singh"][
+                        {["Alone Musk", "Jane Doe", "Alex Kim", "Maria Singh"][
                           index % 4
                         ]}
                       </span>

@@ -93,7 +93,7 @@ function DashboardHeader({
 
   return (
     <>
-      <header className="border-border/80 bg-card/80 flex h-12 shrink-0 items-center gap-3 border-b px-3 sm:h-14 sm:px-4">
+      <header className="border-border/80 bg-card/80 flex h-12 shrink-0 items-center gap-3 border-b px-3 sm:h-[57px] sm:px-4">
         <div className="flex items-center gap-2 min-w-0">
           <Button
             variant="ghost"

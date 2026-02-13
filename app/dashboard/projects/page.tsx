@@ -20,7 +20,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { USERS } from "@/lib/data";
-import { cn } from "@/lib/utils";
+import { cn, getUserColorClass } from "@/lib/utils";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   PlusSignIcon,
@@ -31,6 +31,8 @@ import {
   UserIcon,
   MoreHorizontalCircle01Icon,
   Edit02Icon,
+  SearchIcon,
+  FilterHorizontalIcon,
 } from "@hugeicons/core-free-icons";
 import type { ProjectDetail } from "@/lib/data";
 
@@ -68,6 +70,10 @@ type ProjectHealth = Record<string, string>;
 
 export default function ProjectsPage() {
   const { projectDetails, setProjectDetails } = useDashboard();
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const [statusFilter, setStatusFilter] = React.useState<"all" | ProjectDetail["status"]>("all");
+  const [priorityFilter, setPriorityFilter] = React.useState<"all" | ProjectDetail["priority"]>("all");
+  const [healthFilter, setHealthFilter] = React.useState<"all" | string>("all");
   const [addOpen, setAddOpen] = React.useState(false);
   const [editOpen, setEditOpen] = React.useState(false);
   const [editingProjectId, setEditingProjectId] = React.useState<string | null>(null);
@@ -153,18 +159,108 @@ export default function ProjectsPage() {
     setEditingProjectId(null);
   };
 
+  const filteredProjects = React.useMemo(() => {
+    let list = projectDetails;
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      list = list.filter(
+        (project) =>
+          project.name.toLowerCase().includes(q) ||
+          project.title.toLowerCase().includes(q) ||
+          project.code.toLowerCase().includes(q)
+      );
+    }
+
+    if (statusFilter !== "all") {
+      list = list.filter((project) => project.status === statusFilter);
+    }
+
+    if (priorityFilter !== "all") {
+      list = list.filter((project) => project.priority === priorityFilter);
+    }
+
+    if (healthFilter !== "all") {
+      list = list.filter((project) => (projectHealth[project.id] ?? "no-update") === healthFilter);
+    }
+
+    return list;
+  }, [projectDetails, searchQuery, statusFilter, priorityFilter, healthFilter, projectHealth]);
+
   return (
     <div className="flex h-full flex-1 flex-col overflow-hidden">
-      <header className="border-border/80 bg-card/80 flex h-14 shrink-0 items-center justify-between gap-3 border-b px-4">
-        <h1 className="text-sm font-semibold">Projects</h1>
-        <Button size="sm" className="h-8 text-xs" onClick={() => setAddOpen(true)}>
+      <header className="border-border/80 flex h-14 shrink-0 items-center gap-2 border-b px-4">
+        <div className="relative w-full max-w-xs">
+          <HugeiconsIcon
+            icon={SearchIcon}
+            className="text-muted-foreground pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2"
+          />
+          <Input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search projects..."
+            className="h-8 pl-8 text-xs"
+          />
+        </div>
+        <Select
+          value={statusFilter}
+          onValueChange={(value) => setStatusFilter(value as "all" | ProjectDetail["status"])}
+        >
+          <SelectTrigger className="pm-input h-8 w-[130px] text-xs">
+            <HugeiconsIcon icon={FilterHorizontalIcon} className="mr-1 h-3.5 w-3.5" />
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all" className="text-xs">All status</SelectItem>
+            {STATUS_OPTIONS.map((opt) => (
+              <SelectItem key={opt.value} value={opt.value} className="text-xs">
+                {opt.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select
+          value={priorityFilter}
+          onValueChange={(value) => setPriorityFilter(value as "all" | ProjectDetail["priority"])}
+        >
+          <SelectTrigger className="pm-input h-8 w-[130px] text-xs">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all" className="text-xs">All priority</SelectItem>
+            {PRIORITY_OPTIONS.map((opt) => (
+              <SelectItem key={opt.value} value={opt.value} className="text-xs">
+                {opt.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select
+          value={healthFilter}
+          onValueChange={(value) => setHealthFilter(value as "all" | string)}
+        >
+          <SelectTrigger className="pm-input h-8 w-[130px] text-xs">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all" className="text-xs">All health</SelectItem>
+            {HEALTH_OPTIONS.map((opt) => (
+              <SelectItem key={opt.value} value={opt.value} className="text-xs">
+                {opt.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <div className="ml-auto">
+          <Button size="sm" className="pm-primary-btn h-8 text-xs" onClick={() => setAddOpen(true)}>
           <HugeiconsIcon icon={PlusSignIcon} className="mr-1 h-3.5 w-3.5" />
           Add Project
         </Button>
+        </div>
       </header>
 
       <div className="flex-1 overflow-auto p-4">
-        <div className="overflow-x-auto">
+        <div className="pm-table-wrap overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
               <tr className="border-b border-border/60">
@@ -178,7 +274,7 @@ export default function ProjectsPage() {
               </tr>
             </thead>
             <tbody>
-              {projectDetails.map((project, index) => {
+              {filteredProjects.map((project, index) => {
                 const lead = USERS.find((u) => u.id === project.leadId);
                 const priorityMeta = PRIORITY_OPTIONS.find((p) => p.value === project.priority);
                 const healthValue = projectHealth[project.id] ?? "no-update";
@@ -186,7 +282,7 @@ export default function ProjectsPage() {
                 const statusMeta = STATUS_OPTIONS.find((s) => s.value === project.status);
                 const titleIcon = PROJECT_ICONS[index % PROJECT_ICONS.length];
                 return (
-                  <tr key={project.id} className="border-b border-border/40 hover:bg-muted/20">
+                  <tr key={project.id} className="pm-animated-row border-b border-border/40 hover:bg-muted/20">
                     <td className="px-3 py-3 text-xs font-medium">
                       <div className="flex items-center gap-2">
                         <span className="bg-muted/60 text-muted-foreground flex h-7 w-7 items-center justify-center rounded-md">
@@ -211,7 +307,7 @@ export default function ProjectsPage() {
                           <span
                             className={cn(
                               "flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-semibold text-white",
-                              `bg-linear-to-br ${lead.color}`
+                              getUserColorClass(lead.color)
                             )}
                           >
                             {lead.initials}
@@ -245,6 +341,13 @@ export default function ProjectsPage() {
                   </tr>
                 );
               })}
+              {filteredProjects.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="text-muted-foreground py-8 text-center text-xs">
+                    No projects match the selected filters.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

@@ -27,7 +27,7 @@ import {
   LABEL_OPTIONS,
 } from "@/lib/data";
 import type { Issue, IssueStatusId } from "@/lib/data";
-import { cn } from "@/lib/utils";
+import { cn, getUserColorClass } from "@/lib/utils";
 
 type IssueDetailDialogProps = {
   issue: Issue | null;
@@ -183,7 +183,7 @@ export function IssueDetailDialog({
                       <span
                         className={cn(
                           "flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-semibold text-white",
-                          `bg-linear-to-br ${assignee.color}`
+                          getUserColorClass(assignee.color)
                         )}
                       >
                         {assignee.initials}
@@ -200,7 +200,7 @@ export function IssueDetailDialog({
                       <span
                         className={cn(
                           "flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-semibold text-white",
-                          `bg-linear-to-br ${u.color}`
+                          getUserColorClass(u.color)
                         )}
                       >
                         {u.initials}

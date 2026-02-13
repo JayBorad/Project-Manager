@@ -38,9 +38,9 @@ type DashboardContextValue = {
 
 const CurrentUser: User = {
   id: "u1",
-  name: "Pavan Borad",
+  name: "Alone Musk",
   initials: "PB",
-  color: "from-emerald-500 to-sky-500",
+  color: "bg-emerald-500",
 };
 
 const DashboardContext = React.createContext<DashboardContextValue | null>(null);

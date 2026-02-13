@@ -11,9 +11,10 @@ export default function ProjectsLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className={`${projectFont.variable} font-[family-name:var(--font-project)] text-[13px] leading-5 tracking-[0.01em]`}>
+    <div
+      className={`${projectFont.variable} h-full min-h-0 overflow-hidden font-[family-name:var(--font-project)] text-[13px] leading-5 tracking-[0.01em]`}
+    >
       {children}
     </div>
   );
 }
-

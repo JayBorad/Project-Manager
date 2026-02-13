@@ -7,7 +7,7 @@ import { CardContent, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+import { cn, getUserColorClass } from "@/lib/utils";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   Delete02Icon,
@@ -22,11 +22,17 @@ import {
 } from "@hugeicons/core-free-icons";
 import type { Notification } from "@/lib/data";
 import { USERS } from "@/lib/data";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function InboxPage() {
   const { notifications, setNotifications, currentUser } = useDashboard();
-  const [selectedId, setSelectedId] = React.useState<string | null>(notifications[0]?.id ?? null);
+  const [selectedId, setSelectedId] = React.useState<string | null>(
+    notifications[0]?.id ?? null,
+  );
   const [commentText, setCommentText] = React.useState("");
   const [searchText, setSearchText] = React.useState("");
   const [loading, setLoading] = React.useState(true);
@@ -50,11 +56,15 @@ export default function InboxPage() {
     });
   }, [notifications, searchText]);
 
-  const selected = filteredNotifications.find((n) => n.id === selectedId) ?? notifications.find((n) => n.id === selectedId);
+  const selected =
+    filteredNotifications.find((n) => n.id === selectedId) ??
+    notifications.find((n) => n.id === selectedId);
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   const markAsRead = (id: string) => {
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
+    );
   };
 
   const markAllAsRead = () => {
@@ -90,8 +100,8 @@ export default function InboxPage() {
                 },
               ],
             }
-          : n
-      )
+          : n,
+      ),
     );
     setCommentText("");
   };
@@ -103,48 +113,42 @@ export default function InboxPage() {
         n.id === notificationId
           ? {
               ...n,
-              attachments: [...n.attachments, { id: `a-${Date.now()}`, name, url: "#" }],
+              attachments: [
+                ...n.attachments,
+                { id: `a-${Date.now()}`, name, url: "#" },
+              ],
             }
-          : n
-      )
+          : n,
+      ),
     );
   };
 
   return (
-    <div className="pm-shell flex h-full flex-1 flex-col overflow-hidden">
-      <header className="pm-topbar flex h-14 shrink-0 items-center justify-between gap-3 border-b px-4">
-        <div className="flex min-w-0 items-center gap-2">
-          <span className="bg-primary/10 text-primary flex h-8 w-8 items-center justify-center rounded-xl">
-            <HugeiconsIcon icon={MessageIcon} className="h-4 w-4" />
-          </span>
-          <div className="min-w-0">
-            <h1 className="truncate text-sm font-semibold">Inbox</h1>
-            <p className="text-muted-foreground text-[11px]">Notification center and collaboration thread</p>
-          </div>
-        </div>
-        <Badge variant="outline" className="rounded-full text-[10px]">
-          {unreadCount} unread
-        </Badge>
-      </header>
-
+    <div className="bg-card/80 flex h-full flex-1 flex-col overflow-hidden">
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-0 lg:grid-cols-[minmax(320px,1fr)_minmax(0,1.6fr)]">
-        <div className="pm-surface-card flex min-h-0 flex-col border-0 border-r">
-          <div className="pm-subbar flex shrink-0 items-center justify-between gap-2 border-b px-3 py-2">
+        <div className="flex min-h-0 flex-col border-0 border-r">
+          <div className="flex shrink-0 items-center justify-between gap-2 border-b px-3 py-2">
             <CardTitle className="flex items-center gap-1.5 text-xs">
-              <HugeiconsIcon icon={FileIcon} className="text-primary h-3.5 w-3.5" />
+              <HugeiconsIcon
+                icon={FileIcon}
+                className="text-primary h-3.5 w-3.5"
+              />
               Notifications
             </CardTitle>
-            <div className="flex items-center gap-0.5">
+            <div className="flex items-center gap-1">
               <Tooltip>
                 <TooltipTrigger
                   render={
                     <Button
                       variant="ghost"
-                      size="sm"
-                      className="h-8 w-8 p-0"
+                      size="icon"
+                      className="h-6 w-6"
                       onClick={markAllAsRead}
                     >
-                      <HugeiconsIcon icon={CheckmarkSquareIcon} className="h-4 w-4" />
+                      <HugeiconsIcon
+                        icon={CheckmarkSquareIcon}
+                        className="h-3.5 w-3.5"
+                      />
                     </Button>
                   }
                 />
@@ -155,12 +159,15 @@ export default function InboxPage() {
                   render={
                     <Button
                       variant="ghost"
-                      size="sm"
-                      className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                      size="icon"
+                      className="h-6 w-6 text-destructive"
                       onClick={deleteAll}
                       disabled={notifications.length === 0}
                     >
-                      <HugeiconsIcon icon={Delete02Icon} className="h-4 w-4" />
+                      <HugeiconsIcon
+                        icon={Delete02Icon}
+                        className="h-3.5 w-3.5"
+                      />
                     </Button>
                   }
                 />
@@ -169,14 +176,17 @@ export default function InboxPage() {
             </div>
           </div>
 
-          <div className="pm-subbar shrink-0 border-b px-3 py-2">
+          <div className="shrink-0 border-b px-3 py-2">
             <div className="relative">
-              <HugeiconsIcon icon={SearchIcon} className="text-muted-foreground pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2" />
+              <HugeiconsIcon
+                icon={SearchIcon}
+                className="text-muted-foreground pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2"
+              />
               <Input
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
                 placeholder="Search title, body, project..."
-                className="pm-input h-8 pl-8 text-xs"
+                className="h-8 pl-8 text-xs"
               />
             </div>
           </div>
@@ -186,7 +196,9 @@ export default function InboxPage() {
               {loading ? (
                 <InboxListSkeleton />
               ) : filteredNotifications.length === 0 ? (
-                <div className="text-muted-foreground py-12 text-center text-sm">No notifications found</div>
+                <div className="text-muted-foreground py-12 text-center text-sm">
+                  No notifications found
+                </div>
               ) : (
                 <ul>
                   {filteredNotifications.map((item) => (
@@ -195,7 +207,7 @@ export default function InboxPage() {
                       className={cn(
                         "pm-animated-row hover:bg-muted/60 flex cursor-pointer flex-col gap-2 border-b border-border/60 px-3 py-3 transition-colors",
                         selectedId === item.id && "bg-muted/80",
-                        !item.read && "bg-primary/5"
+                        !item.read && "bg-primary/5",
                       )}
                       onClick={() => {
                         setSelectedId(item.id);
@@ -206,41 +218,71 @@ export default function InboxPage() {
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
                             <NotificationTypeIcon type={item.type} />
-                            <span className="line-clamp-1 text-xs font-medium">{item.title}</span>
+                            <span className="line-clamp-1 text-xs font-medium">
+                              {item.title}
+                            </span>
                           </div>
-                          <p className="text-muted-foreground mt-0.5 line-clamp-1 text-[11px]">{item.body}</p>
+                          <p className="text-muted-foreground mt-0.5 line-clamp-1 text-[11px]">
+                            {item.body}
+                          </p>
                         </div>
-                        <span className="text-muted-foreground shrink-0 text-[10px]">{item.createdAt}</span>
+                        <span className="text-muted-foreground shrink-0 text-[10px]">
+                          {item.createdAt}
+                        </span>
                       </div>
                       <div className="flex items-center justify-between gap-2">
                         <span className="text-muted-foreground text-[11px]">
                           {item.projectKey} · {item.type.replace("_", " ")}
                         </span>
                         <div className="flex items-center gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              markAsRead(item.id);
-                            }}
-                            title="Mark as read"
-                          >
-                            <HugeiconsIcon icon={LinkSquareIcon} className="h-3.5 w-3.5" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6 text-destructive"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              deleteOne(item.id);
-                            }}
-                            title="Delete"
-                          >
-                            <HugeiconsIcon icon={Delete02Icon} className="h-3.5 w-3.5" />
-                          </Button>
+                          <Tooltip>
+                            <TooltipTrigger
+                              render={
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-6 w-6"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    markAsRead(item.id);
+                                  }}
+                                  title="Mark as read"
+                                >
+                                  <HugeiconsIcon
+                                    icon={LinkSquareIcon}
+                                    className="h-3.5 w-3.5"
+                                  />
+                                </Button>
+                              }
+                            />
+                            <TooltipContent side="bottom">
+                              Mark as read
+                            </TooltipContent>
+                          </Tooltip>
+                          <Tooltip>
+                            <TooltipTrigger
+                              render={
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-6 w-6 text-destructive"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    deleteOne(item.id);
+                                  }}
+                                  title="Delete"
+                                >
+                                  <HugeiconsIcon
+                                    icon={Delete02Icon}
+                                    className="h-3.5 w-3.5"
+                                  />
+                                </Button>
+                              }
+                            />
+                            <TooltipContent side="bottom">
+                              Delete
+                            </TooltipContent>
+                          </Tooltip>
                         </div>
                       </div>
                     </li>
@@ -251,10 +293,13 @@ export default function InboxPage() {
           </ScrollArea>
         </div>
 
-        <div className="pm-surface-card flex min-h-0 flex-col border-0">
-          <div className="pm-subbar flex shrink-0 items-center justify-between gap-2 border-b px-4 py-3">
+        <div className="flex min-h-0 flex-col border-0">
+          <div className="flex shrink-0 items-center justify-between gap-2 border-b px-4 py-4">
             <CardTitle className="flex items-center gap-1.5 text-xs">
-              <HugeiconsIcon icon={ArrowRight01Icon} className="text-primary h-3.5 w-3.5" />
+              <HugeiconsIcon
+                icon={ArrowRight01Icon}
+                className="text-primary h-3.5 w-3.5"
+              />
               Details
             </CardTitle>
           </div>
@@ -319,7 +364,9 @@ function NotificationDetail({
       <CardContent className="flex flex-col gap-4 py-4">
         <div className="pm-animated-row rounded-xl border border-border/60 bg-muted/20 p-3">
           <h2 className="text-sm font-medium">{notification.title}</h2>
-          <p className="text-muted-foreground mt-1 text-xs">{notification.body}</p>
+          <p className="text-muted-foreground mt-1 text-xs">
+            {notification.body}
+          </p>
           <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
             <Badge variant="outline" className="text-[10px]">
               {notification.projectKey}
@@ -354,7 +401,9 @@ function NotificationDetail({
               </li>
             ))}
             {notification.attachments.length === 0 && (
-              <li className="text-muted-foreground text-[11px]">No attachments</li>
+              <li className="text-muted-foreground text-[11px]">
+                No attachments
+              </li>
             )}
           </ul>
         </div>
@@ -365,17 +414,22 @@ function NotificationDetail({
             {notification.comments.map((c) => {
               const author = USERS.find((u) => u.id === c.authorId);
               return (
-                <li key={c.id} className="rounded-md border border-border/60 bg-background/70 p-2">
+                <li
+                  key={c.id}
+                  className="rounded-md border border-border/60 bg-background/70 p-2"
+                >
                   <div className="flex items-center gap-2 text-[11px]">
                     <span
                       className={cn(
                         "flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-semibold text-white",
-                        author ? author.color : "bg-muted"
+                        author ? getUserColorClass(author.color) : "bg-muted",
                       )}
                     >
                       {author?.initials ?? "?"}
                     </span>
-                    <span className="font-medium">{author?.name ?? "Unknown"}</span>
+                    <span className="font-medium">
+                      {author?.name ?? "Unknown"}
+                    </span>
                     <span className="text-muted-foreground">{c.createdAt}</span>
                   </div>
                   <p className="mt-1 text-xs">{c.text}</p>
@@ -389,7 +443,9 @@ function NotificationDetail({
               onChange={(e) => setCommentText(e.target.value)}
               placeholder="Add a comment..."
               className="pm-input h-8 text-xs"
-              onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), onAddComment())}
+              onKeyDown={(e) =>
+                e.key === "Enter" && (e.preventDefault(), onAddComment())
+              }
             />
             <Button
               size="sm"
@@ -410,7 +466,10 @@ function InboxListSkeleton() {
   return (
     <div className="p-2">
       {Array.from({ length: 8 }).map((_, index) => (
-        <div key={index} className="mb-2 animate-pulse rounded-lg border border-border/60 bg-muted/30 p-3">
+        <div
+          key={index}
+          className="mb-2 animate-pulse rounded-lg border border-border/60 bg-muted/30 p-3"
+        >
           <div className="mb-2 flex items-center justify-between gap-2">
             <div className="h-3 w-2/3 rounded bg-muted" />
             <div className="h-2.5 w-10 rounded bg-muted" />

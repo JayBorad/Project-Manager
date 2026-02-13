@@ -80,7 +80,7 @@ export const PROJECTS: Project[] = [
 ];
 
 export const USERS: User[] = [
-  { id: "u1", name: "Pavan Borad", initials: "PB", color: "from-emerald-500 to-sky-500" },
+  { id: "u1", name: "Alone Musk", initials: "PB", color: "from-emerald-500 to-sky-500" },
   { id: "u2", name: "Jane Doe", initials: "JD", color: "from-violet-500 to-amber-500" },
   { id: "u3", name: "Alex Kim", initials: "AK", color: "from-amber-500 to-rose-500" },
   { id: "u4", name: "Maria Singh", initials: "MS", color: "from-sky-500 to-emerald-500" },
@@ -131,22 +131,22 @@ export function getInitialNotifications(): Notification[] {
     { id: "n2", type: "issue_comment", title: "Optimize animations for smoother UI transitions", body: "Performance metrics look good on desktop; need another pass on mobile.", projectKey: "LNUI-204", relatedId: "issue-2", createdAt: "4d ago", read: false, attachments: [{ id: "a1", name: "metrics.pdf", url: "#" }], comments: [] },
     { id: "n3", type: "pull_request", title: "Implement dark mode toggle with system preferences", body: "Follow-up to clean up legacy tokens and deprecated theme flags.", projectKey: "LNUI-309", relatedId: "pr-3", createdAt: "6d ago", read: true, attachments: [], comments: [] },
     { id: "n4", type: "assign", title: "Improve navbar responsiveness", body: "You have been assigned to this issue.", projectKey: "LNUI-501", relatedId: "issue-4", createdAt: "18d ago", read: false, attachments: [], comments: [] },
-    { id: "n5", type: "mention", title: "Review needed: Modal focus trap", body: "@Pavan please review the focus trap implementation.", projectKey: "LNUI-415", relatedId: "pr-5", createdAt: "2d ago", read: false, attachments: [], comments: [] },
+    { id: "n5", type: "mention", title: "Review needed: Modal focus trap", body: "@Alone please review the focus trap implementation.", projectKey: "LNUI-415", relatedId: "pr-5", createdAt: "2d ago", read: false, attachments: [], comments: [] },
     { id: "n6", type: "pull_request", title: "Refactor button component for accessibility", body: "Updated contrast tokens and focus rings based on the new design spec.", projectKey: "LNUI-101", relatedId: "pr-1", createdAt: "10h ago", read: false, attachments: [], comments: [{ id: "c1", authorId: "u2", text: "LGTM, please add a story for focus state.", createdAt: "9h ago" }] },
     { id: "n7", type: "issue_comment", title: "Optimize animations for smoother UI transitions", body: "Performance metrics look good on desktop; need another pass on mobile.", projectKey: "LNUI-204", relatedId: "issue-2", createdAt: "4d ago", read: false, attachments: [{ id: "a1", name: "metrics.pdf", url: "#" }], comments: [] },
     { id: "n8", type: "pull_request", title: "Implement dark mode toggle with system preferences", body: "Follow-up to clean up legacy tokens and deprecated theme flags.", projectKey: "LNUI-309", relatedId: "pr-3", createdAt: "6d ago", read: true, attachments: [], comments: [] },
     { id: "n9", type: "assign", title: "Improve navbar responsiveness", body: "You have been assigned to this issue.", projectKey: "LNUI-501", relatedId: "issue-4", createdAt: "18d ago", read: false, attachments: [], comments: [] },
-    { id: "n10", type: "mention", title: "Review needed: Modal focus trap", body: "@Pavan please review the focus trap implementation.", projectKey: "LNUI-415", relatedId: "pr-5", createdAt: "2d ago", read: false, attachments: [], comments: [] },
+    { id: "n10", type: "mention", title: "Review needed: Modal focus trap", body: "@Alone please review the focus trap implementation.", projectKey: "LNUI-415", relatedId: "pr-5", createdAt: "2d ago", read: false, attachments: [], comments: [] },
     { id: "n11", type: "pull_request", title: "Refactor button component for accessibility", body: "Updated contrast tokens and focus rings based on the new design spec.", projectKey: "LNUI-101", relatedId: "pr-1", createdAt: "10h ago", read: false, attachments: [], comments: [{ id: "c1", authorId: "u2", text: "LGTM, please add a story for focus state.", createdAt: "9h ago" }] },
     { id: "n12", type: "issue_comment", title: "Optimize animations for smoother UI transitions", body: "Performance metrics look good on desktop; need another pass on mobile.", projectKey: "LNUI-204", relatedId: "issue-2", createdAt: "4d ago", read: false, attachments: [{ id: "a1", name: "metrics.pdf", url: "#" }], comments: [] },
     { id: "n13", type: "pull_request", title: "Implement dark mode toggle with system preferences", body: "Follow-up to clean up legacy tokens and deprecated theme flags.", projectKey: "LNUI-309", relatedId: "pr-3", createdAt: "6d ago", read: true, attachments: [], comments: [] },
     { id: "n14", type: "assign", title: "Improve navbar responsiveness", body: "You have been assigned to this issue.", projectKey: "LNUI-501", relatedId: "issue-4", createdAt: "18d ago", read: false, attachments: [], comments: [] },
-    { id: "n15", type: "mention", title: "Review needed: Modal focus trap", body: "@Pavan please review the focus trap implementation.", projectKey: "LNUI-415", relatedId: "pr-5", createdAt: "2d ago", read: false, attachments: [], comments: [] },
+    { id: "n15", type: "mention", title: "Review needed: Modal focus trap", body: "@Alone please review the focus trap implementation.", projectKey: "LNUI-415", relatedId: "pr-5", createdAt: "2d ago", read: false, attachments: [], comments: [] },
     { id: "n16", type: "pull_request", title: "Refactor button component for accessibility", body: "Updated contrast tokens and focus rings based on the new design spec.", projectKey: "LNUI-101", relatedId: "pr-1", createdAt: "10h ago", read: false, attachments: [], comments: [{ id: "c1", authorId: "u2", text: "LGTM, please add a story for focus state.", createdAt: "9h ago" }] },
     { id: "n17", type: "issue_comment", title: "Optimize animations for smoother UI transitions", body: "Performance metrics look good on desktop; need another pass on mobile.", projectKey: "LNUI-204", relatedId: "issue-2", createdAt: "4d ago", read: false, attachments: [{ id: "a1", name: "metrics.pdf", url: "#" }], comments: [] },
     { id: "n18", type: "pull_request", title: "Implement dark mode toggle with system preferences", body: "Follow-up to clean up legacy tokens and deprecated theme flags.", projectKey: "LNUI-309", relatedId: "pr-3", createdAt: "6d ago", read: true, attachments: [], comments: [] },
     { id: "n19", type: "assign", title: "Improve navbar responsiveness", body: "You have been assigned to this issue.", projectKey: "LNUI-501", relatedId: "issue-4", createdAt: "18d ago", read: false, attachments: [], comments: [] },
-    { id: "n20", type: "mention", title: "Review needed: Modal focus trap", body: "@Pavan please review the focus trap implementation.", projectKey: "LNUI-415", relatedId: "pr-5", createdAt: "2d ago", read: false, attachments: [], comments: [] },
+    { id: "n20", type: "mention", title: "Review needed: Modal focus trap", body: "@Alone please review the focus trap implementation.", projectKey: "LNUI-415", relatedId: "pr-5", createdAt: "2d ago", read: false, attachments: [], comments: [] },
   ];
 }
 
@@ -225,7 +225,7 @@ export type UserDetail = User & {
 
 export function getUserDetails(): UserDetail[] {
   return [
-    { id: "u1", name: "Pavan Borad", initials: "PB", color: "from-emerald-500 to-sky-500", email: "pavan.borad@example.com", status: "admin", teamIds: ["t1", "t2", "t4"] },
+    { id: "u1", name: "Alone Musk", initials: "PB", color: "from-emerald-500 to-sky-500", email: "alone.musk@example.com", status: "admin", teamIds: ["t1", "t2", "t4"] },
     { id: "u2", name: "Jane Doe", initials: "JD", color: "from-violet-500 to-amber-500", email: "jane.doe@example.com", status: "member", teamIds: ["t1", "t3"] },
     { id: "u3", name: "Alex Kim", initials: "AK", color: "from-amber-500 to-rose-500", email: "alex.kim@example.com", status: "member", teamIds: ["t1", "t3", "t4"] },
     { id: "u4", name: "Maria Singh", initials: "MS", color: "from-sky-500 to-emerald-500", email: "maria.singh@example.com", status: "guest", teamIds: ["t2", "t3"] },
