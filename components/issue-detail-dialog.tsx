@@ -4,6 +4,7 @@ import * as React from "react";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -58,36 +59,25 @@ export function IssueDetailDialog({
     }
   }, [issue]);
 
-  const updateIssue = React.useCallback(
-    (patch: Partial<Issue>) => {
-      if (!issue) return;
-      setIssues((prev) =>
-        prev.map((i) => (i.id === issue.id ? { ...i, ...patch, updatedAt: "Just now" } : i))
-      );
-    },
-    [issue, setIssues]
-  );
-
-  const handleStatusChange = (v: string) => {
-    const next = v as IssueStatusId;
-    setStatusId(next);
-    updateIssue({ statusId: next });
-  };
-
-  const handleAssigneeChange = (v: string) => {
-    setAssigneeId(v);
-    updateIssue({ assigneeId: v });
-  };
-
-  const handlePriorityChange = (v: string) => {
-    const next = v as Issue["priority"];
-    setPriority(next);
-    updateIssue({ priority: next });
-  };
-
   const handleSaveDetails = () => {
     if (!issue) return;
-    updateIssue({ title: title.trim(), description: description.trim() });
+    setIssues((prev) =>
+      prev.map((i) =>
+        i.id === issue.id
+          ? {
+              ...i,
+              title: title.trim(),
+              description: description.trim(),
+              statusId,
+              assigneeId,
+              priority,
+              labels,
+              updatedAt: "Just now",
+            }
+          : i
+      )
+    );
+    onOpenChange(false);
   };
 
   const toggleLabel = (name: string, color: string) => {
@@ -95,13 +85,14 @@ export function IssueDetailDialog({
       ? labels.filter((l) => l.name !== name)
       : [...labels, { name, color }];
     setLabels(next);
-    updateIssue({ labels: next });
   };
 
   if (!issue) return null;
 
   const project = PROJECTS.find((p) => p.id === issue.projectId);
   const assignee = USERS.find((u) => u.id === assigneeId);
+  const creatorId = (issue as Issue & { creatorId?: string }).creatorId ?? issue.assigneeId;
+  const creator = USERS.find((u) => u.id === creatorId);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -119,7 +110,6 @@ export function IssueDetailDialog({
               id="detail-title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              onBlur={handleSaveDetails}
               className="text-sm"
             />
           </div>
@@ -129,7 +119,6 @@ export function IssueDetailDialog({
               id="detail-desc"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              onBlur={handleSaveDetails}
               className="border-input bg-background focus-visible:ring-ring/50 min-h-[100px] w-full rounded-md border px-3 py-2 text-sm outline-none focus-visible:ring-1"
             />
           </div>
@@ -138,7 +127,7 @@ export function IssueDetailDialog({
               <Label>Status</Label>
               <Select
                 value={statusId}
-                onValueChange={(value, _eventDetails) => handleStatusChange(value as IssueStatusId)}
+                onValueChange={(value) => setStatusId(value as IssueStatusId)}
               >
                 <SelectTrigger className="h-8 text-xs">
                   <SelectValue />
@@ -156,7 +145,7 @@ export function IssueDetailDialog({
               <Label>Priority</Label>
               <Select
                 value={priority}
-                onValueChange={(value, _eventDetails) => handlePriorityChange(value as "High" | "Medium" | "Low")}
+                onValueChange={(value) => setPriority(value as "High" | "Medium" | "Low")}
               >
                 <SelectTrigger className="h-8 text-xs">
                   <SelectValue />
@@ -176,10 +165,16 @@ export function IssueDetailDialog({
             </div>
           </div>
           <div className="space-y-2">
+            <Label>Created by</Label>
+            <div className="text-muted-foreground rounded-md border border-border/60 bg-muted/30 px-3 py-2 text-xs">
+              {creator?.name ?? "Unknown user"}
+            </div>
+          </div>
+          <div className="space-y-2">
             <Label>Assigned to</Label>
             <Select
               value={assigneeId}
-              onValueChange={(value, _eventDetails) => handleAssigneeChange(value as string)}
+              onValueChange={(value) => setAssigneeId(value as string)}
             >
               <SelectTrigger className="h-8 text-xs">
                 <SelectValue>
@@ -241,6 +236,14 @@ export function IssueDetailDialog({
           <div className="text-muted-foreground text-[11px]">
             Updated {issue.updatedAt}
           </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveDetails} disabled={!title.trim()}>
+              Confirm
+            </Button>
+          </DialogFooter>
         </div>
       </DialogContent>
     </Dialog>

@@ -101,8 +101,7 @@ export const LABEL_OPTIONS: { name: string; color: string }[] = [
 const LABEL_PRESETS = LABEL_OPTIONS;
 
 function pickLabels(n: number): Issue["labels"] {
-  const shuffled = [...LABEL_PRESETS].sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, n).map((l) => ({ name: l.name, color: l.color }));
+  return LABEL_PRESETS.slice(0, n).map((l) => ({ name: l.name, color: l.color }));
 }
 
 export function getInitialIssues(currentUserId: string): Issue[] {
@@ -126,7 +125,7 @@ export function getInitialIssues(currentUserId: string): Issue[] {
   ];
 }
 
-export function getInitialNotifications(currentUserId: string): Notification[] {
+export function getInitialNotifications(): Notification[] {
   return [
     { id: "n1", type: "pull_request", title: "Refactor button component for accessibility", body: "Updated contrast tokens and focus rings based on the new design spec.", projectKey: "LNUI-101", relatedId: "pr-1", createdAt: "10h ago", read: false, attachments: [], comments: [{ id: "c1", authorId: "u2", text: "LGTM, please add a story for focus state.", createdAt: "9h ago" }] },
     { id: "n2", type: "issue_comment", title: "Optimize animations for smoother UI transitions", body: "Performance metrics look good on desktop; need another pass on mobile.", projectKey: "LNUI-204", relatedId: "issue-2", createdAt: "4d ago", read: false, attachments: [{ id: "a1", name: "metrics.pdf", url: "#" }], comments: [] },

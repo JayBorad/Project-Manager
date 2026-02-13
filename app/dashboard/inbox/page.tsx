@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useDashboard } from "@/lib/dashboard-context";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardContent, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
@@ -102,33 +102,37 @@ export default function InboxPage() {
             <CardTitle className="text-xs">Notifications</CardTitle>
             <div className="flex items-center gap-0.5">
               <Tooltip>
-                <TooltipTrigger>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0 flex items-center justify-center"
-                    onClick={markAllAsRead}
-                  >
-                    <HugeiconsIcon
-                      icon={CheckmarkSquareIcon}
-                      className="h-4 w-4"
-                    />
-                  </Button>
-                </TooltipTrigger>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0 flex items-center justify-center"
+                      onClick={markAllAsRead}
+                    >
+                      <HugeiconsIcon
+                        icon={CheckmarkSquareIcon}
+                        className="h-4 w-4"
+                      />
+                    </Button>
+                  }
+                />
                 <TooltipContent side="bottom">Mark all as read</TooltipContent>
               </Tooltip>
               <Tooltip>
-                <TooltipTrigger>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0 flex items-center justify-center text-destructive hover:text-destructive"
-                    onClick={deleteAll}
-                    disabled={notifications.length === 0}
-                  >
-                    <HugeiconsIcon icon={Delete02Icon} className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0 flex items-center justify-center text-destructive hover:text-destructive"
+                      onClick={deleteAll}
+                      disabled={notifications.length === 0}
+                    >
+                      <HugeiconsIcon icon={Delete02Icon} className="h-4 w-4" />
+                    </Button>
+                  }
+                />
                 <TooltipContent side="bottom">Delete all</TooltipContent>
               </Tooltip>
             </div>

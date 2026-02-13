@@ -50,7 +50,7 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
   const [workspace, setWorkspace] = React.useState<Workspace>(WORKSPACES[0]);
   const [workspaces, setWorkspaces] = React.useState<Workspace[]>(WORKSPACES);
   const [notifications, setNotifications] = React.useState<Notification[]>(() =>
-    getInitialNotifications(CurrentUser.id)
+    getInitialNotifications()
   );
   const [issues, setIssues] = React.useState<Issue[]>(() =>
     getInitialIssues(CurrentUser.id)
