@@ -80,6 +80,15 @@ export type ProjectSectionProps = {
   section: ProjectSectionType;
 };
 
+const PR_STATUS_META: Record<
+  PullRequest["status"],
+  { label: string; color: string; icon: typeof LayoutIcon }
+> = {
+  open: { label: "Open", color: "text-sky-400", icon: LinkSquareIcon },
+  merged: { label: "Merged", color: "text-emerald-400", icon: CheckmarkCircle01Icon },
+  closed: { label: "Closed", color: "text-rose-400", icon: MoreHorizontalCircle01Icon },
+};
+
 export function ProjectSection({ projectId, section }: ProjectSectionProps) {
   const {
     issues,
@@ -1472,6 +1481,7 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                       (["open", "merged", "closed"] as PullRequest["status"][])
                         .filter((status) => status.toLowerCase().includes(prFilterSearch.toLowerCase()))
                         .map((status) => {
+                          const statusMeta = PR_STATUS_META[status];
                           const count = projectPullRequests.filter((pr) => pr.status === status).length;
                           const active = prStatusFilter.includes(status);
                           return (
@@ -1488,7 +1498,10 @@ export function ProjectSection({ projectId, section }: ProjectSectionProps) {
                                 active && "bg-primary/10 text-primary"
                               )}
                             >
-                              <span className="capitalize">{status}</span>
+                              <span className={cn("inline-flex items-center gap-1.5", statusMeta.color)}>
+                                <HugeiconsIcon icon={statusMeta.icon} className="h-3.5 w-3.5" />
+                                <span>{statusMeta.label}</span>
+                              </span>
                               <span className="text-muted-foreground text-[11px]">{count}</span>
                             </button>
                           );
@@ -3184,6 +3197,7 @@ function ProjectPullRequestRow({
   onClick: () => void;
 }) {
   const author = USERS.find((u) => u.id === pullRequest.authorId);
+  const statusMeta = PR_STATUS_META[pullRequest.status];
 
   return (
     <button
@@ -3199,7 +3213,15 @@ function ProjectPullRequestRow({
           {pullRequest.description}
         </p>
         <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
-          <span className="capitalize">{pullRequest.status}</span>
+          <span
+            className={cn(
+              "inline-flex items-center gap-1 rounded-full border border-border/60 bg-muted/30 px-2 py-0.5",
+              statusMeta.color
+            )}
+          >
+            <HugeiconsIcon icon={statusMeta.icon} className="h-3 w-3" />
+            <span>{statusMeta.label}</span>
+          </span>
           <span>·</span>
           <span>Opened {pullRequest.createdAt}</span>
           <span>·</span>
